@@ -1,0 +1,59 @@
+debug: true
+
+logging:
+  level:
+    org.hibernate.SQL: INFO
+    org.springframework:
+      boot.actuate.audit.listener.AuditListener: INFO
+      web: INFO
+      orm: DEBUG
+      orm.jpa.JpaTransactionManager: INFO
+      security.jwt: DEBUG
+      security.oauth2: DEBUG
+      transaction: INFO
+    org.apache.tomcat: WARN
+    com.myco: DEBUG
+
+axon:
+  axonserver:
+    servers: yardsale-axonserver
+  serializer:
+    events: jackson
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: "@project.name@"
+  resources:
+    chain:
+      enabled: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5439/yardsale
+    username: yardsale
+    password: yardsale
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: false
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+
+yardsale.secure-data-secret: a very secure secret, you will never guess this!!!!
+
+---
+spring.profiles: docker
+
+server:
+  port: 80

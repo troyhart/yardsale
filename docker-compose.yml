@@ -1,0 +1,78 @@
+version: '2'
+
+volumes:
+  yardsale-app-db_data:
+  yardsale-axonserver_data:
+  yardsale-sso-db_data:
+
+services:
+  yardsale-axonserver:
+    image: axoniq/axonserver:4.1.2
+    ports:
+      - 8024:8024
+      - 8124:8124
+    environment:
+      - AXONSERVER_HOSTNAME=yardsale-axonserver
+    volumes:
+      - yardsale-axonserver_data:/opt/yardsale-axonserver/data
+
+  yardsale-sso-db:
+    image: postgres:11.2
+    labels:
+      - "co.elastic.logs/module=postgresql"
+      - "co.elastic.metrics/module=postgresql"
+    ports:
+      - 5432:5432
+    volumes:
+      - yardsale-sso-db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=yardsale-sso
+      - POSTGRES_PASSWORD=supersecret
+
+  yardsale-sso:
+    image: jboss/keycloak:4.8.3.Final
+    environment:
+      - DB_VENDOR=POSTGRES
+      - DB_ADDR=yardsale-sso-db
+      - DB_DATABASE=yardsale-sso
+      - DB_USER=yardsale-sso
+      - DB_PASSWORD=supersecret
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=password
+      - KEYCLOAK_IMPORT=/opt/jboss/keycloak/yardsale-realm.json
+    ports:
+      - 8999:8080
+    volumes:
+      - ${BASE_DIR}/keycloak-realm.json:/opt/jboss/keycloak/yardsale-realm.json
+    depends_on:
+      - yardsale-sso-db
+
+  yardsale-app-db:
+    image: postgres:alpine
+    labels:
+      - "co.elastic.logs/module=postgresql"
+      - "co.elastic.metrics/module=postgresql"
+    ports:
+      - 5439:5432
+    volumes:
+      - yardsale-app-db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=yardsale
+      - POSTGRES_USER=yardsale
+      - POSTGRES_PASSWORD=yardsale
+
+  yardsale-app:
+    image: troyhart/yardsale-app:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,dev
+      - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI=${SSO_BASEURL}/auth/realms/yardsale/protocol/openid-connect/certs
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://yardsale-app-db:5432/yardsale
+      - SPRING_DATASOURCE_USERNAME=yardsale
+      - SPRING_DATASOURCE_PASSWORD=yardsale
+    ports:
+      - 8081:80
+      - 8000:8000
+    depends_on:
+      - yardsale-app-db
+      - yardsale-axonserver

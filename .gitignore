@@ -1,0 +1,37 @@
+/container-logs/
+logs/
+target/
+
+keystore*
+
+.attach_pid*
+
+!.mvn/wrapper/maven-wrapper.jar
+
+### vscode
+.vscode
+
+### eclipse/STS ###
+bin/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.pmd
+*.md.html
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
