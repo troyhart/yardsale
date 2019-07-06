@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>core-jpa</artifactId>
-  <description>FedEx Exceptions Core JPA (persistence) Library</description>
+  <description>Core JPA (persistence) Library</description>
   <packaging>jar</packaging>
 
   <properties>

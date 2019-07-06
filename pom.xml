@@ -28,6 +28,12 @@
     <module>user-command</module>
     <module>user-query</module>
     <module>user-rest</module>
+
+    <module>item-api</module>
+
+    <module>stock-api</module>
+
+    <module>order-api</module>
   </modules>
 
   <properties>

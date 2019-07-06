@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>user-api</artifactId>
-  <description>FedEx Exceptions User bounded context API.</description>
+  <description>User bounded context API.</description>
   <packaging>jar</packaging>
 
   <properties>

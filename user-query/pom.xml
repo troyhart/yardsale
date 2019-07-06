@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>user-queries</artifactId>
-  <description>FedEx Exceptions User bounded context query side implementation.</description>
+  <description>User bounded context query side implementation.</description>
   <packaging>jar</packaging>
 
   <properties>

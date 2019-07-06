@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>core-util</artifactId>
-  <description>FedEx Exceptions Core Utility Library</description>
+  <description>Core Utility Library</description>
   <packaging>jar</packaging>
 
   <properties>

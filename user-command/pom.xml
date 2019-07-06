@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>user-commands</artifactId>
-  <description>FedEx Exceptions User bounded context command side implementation.</description>
+  <description>User bounded context command side implementation.</description>
   <packaging>jar</packaging>
 
   <properties>
