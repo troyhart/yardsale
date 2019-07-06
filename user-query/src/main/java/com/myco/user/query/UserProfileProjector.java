@@ -3,6 +3,7 @@ package com.myco.user.query;
 import com.myco.api.values.UserInfo;
 import com.myco.user.api.events.ExternalAuthInfoUpdated;
 import com.myco.user.api.events.UserCreated;
+import com.myco.user.api.events.UserEvent;
 import com.myco.user.api.events.UserPreferencesUpdated;
 import com.myco.user.api.queries.UserProfileByIdQuery;
 import com.myco.util.slf4j.MdcAutoClosable;
@@ -26,12 +27,12 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 @Component class UserProfileProjector {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileProjector.class);
 
-  private UserProfileContainerRepository userProfileContainerRepository;
+  private MaterializedUserProfileRepository materializedUserProfileRepository;
   private QueryUpdateEmitter queryUpdateEmitter;
 
-  @Autowired UserProfileProjector(UserProfileContainerRepository userProfileContainerRepository,
+  @Autowired UserProfileProjector(MaterializedUserProfileRepository materializedUserProfileRepository,
       QueryUpdateEmitter queryUpdateEmitter) {
-    this.userProfileContainerRepository = userProfileContainerRepository;
+    this.materializedUserProfileRepository = materializedUserProfileRepository;
     this.queryUpdateEmitter = queryUpdateEmitter;
   }
 
@@ -39,13 +40,12 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
       @MetaDataValue(USER_INFO) UserInfo userInfo) {
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
-      mdc(event.getUserId(), aggregateVersion, mdc);
-      handleDebug(event);
+      materializedViewHandlingMdc(event, userInfo, aggregateVersion, mdc);
 
       UserProfileImpl userProfile = new UserProfileImpl();
       userProfile.setUserId(event.getUserId());
 
-      save(new UserProfileContainer(userProfile), userInfo, occurrenceInstant, aggregateVersion);
+      save(new MaterializedUserProfile(userProfile), userInfo, occurrenceInstant, aggregateVersion);
     }
   }
 
@@ -53,51 +53,49 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
       @Timestamp Instant occurrenceInstant, @MetaDataValue(USER_INFO) UserInfo userInfo) {
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
-      mdc(event.getUserId(), aggregateVersion, mdc);
-      handleDebug(event);
+      materializedViewHandlingMdc(event, userInfo, aggregateVersion, mdc);
 
-      UserProfileContainer userProfileContainer = userProfileContainerRepository.findById(event.getUserId()).get();
-      userProfileContainer.getUserProfile().setExternalApiKeyEncrypted(event.getExternalApiKeyEncrypted())
+      MaterializedUserProfile materializedUserProfile = materializedUserProfileRepository.findById(event.getUserId()).get();
+      materializedUserProfile.getUserProfile().setExternalApiKeyEncrypted(event.getExternalApiKeyEncrypted())
           .setExternalUserId(event.getExternalUserId());
 
-      save(userProfileContainer, userInfo, occurrenceInstant, aggregateVersion);
+      save(materializedUserProfile, userInfo, occurrenceInstant, aggregateVersion);
     }
   }
 
   @EventHandler void on(UserPreferencesUpdated event, @SequenceNumber long aggregateVersion,
       @Timestamp Instant occurrenceInstant, @MetaDataValue(USER_INFO) UserInfo userInfo) {
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
-      mdc(event.getUserId(), aggregateVersion, mdc);
-      handleDebug(event);
+      materializedViewHandlingMdc(event, userInfo, aggregateVersion, mdc);
 
-      UserProfileContainer userProfileContainer = userProfileContainerRepository.findById(event.getUserId()).get();
-      userProfileContainer.getUserProfile()
+      MaterializedUserProfile materializedUserProfile = materializedUserProfileRepository.findById(event.getUserId()).get();
+      materializedUserProfile.getUserProfile()
           .setDimUnits(event.getDimUnits())
           .setWeightUnits(event.getWeightUnits());
 
-      save(userProfileContainer, userInfo, occurrenceInstant, aggregateVersion);
+      save(materializedUserProfile, userInfo, occurrenceInstant, aggregateVersion);
     }
   }
 
   @QueryHandler UserProfileImpl handle(UserProfileByIdQuery query, @MetaDataValue(USER_INFO) UserInfo userInfo) {
     assertUserCanQuery(query, userInfo);
-    Optional<UserProfileContainer> record = userProfileContainerRepository.findById(query.getId());
-    return record.isPresent() ? record.get().getUserProfile() : null;
+    Optional<MaterializedUserProfile> record = materializedUserProfileRepository.findById(query.getId());
+    return record.get().getUserProfile();
   }
 
 
-  private void save(UserProfileContainer userProfileContainer, UserInfo userInfo, Instant occurrenceInstant,
+  private void save(MaterializedUserProfile materializedUserProfile, UserInfo userInfo, Instant occurrenceInstant,
       long aggregateVersion) {
 
-    userProfileContainer.getUserProfile().setLastModifiedBy(userInfo.getName())
+    materializedUserProfile.getUserProfile().setLastModifiedBy(userInfo.getName())
         .setLastModifiedById(userInfo.getUserId()).setLastModifiedInstant(occurrenceInstant)
         .setAggregateVersion(aggregateVersion);
 
-    userProfileContainerRepository.save(userProfileContainer);
+    materializedUserProfileRepository.save(materializedUserProfile);
 
-    LOGGER.debug("emitting update: {}", userProfileContainer.getUserProfile());
-    queryUpdateEmitter.emit(UserProfileByIdQuery.class, query -> query.getId().equals(userProfileContainer.getId()),
-        userProfileContainer.getUserProfile());
+    LOGGER.debug("emitting update: {}", materializedUserProfile.getUserProfile());
+    queryUpdateEmitter.emit(UserProfileByIdQuery.class, query -> query.getId().equals(materializedUserProfile.getId()),
+        materializedUserProfile.getUserProfile());
   }
 
 
@@ -110,12 +108,16 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
     Assert.notNull(query, "null query");
   }
 
-  private void mdc(String userId, long aggregateVersion, MdcAutoClosable mdc) {
-    mdc.put("UserId", userId);
-    mdc.put("AggregateVersion", aggregateVersion);
+  private void materializedViewHandlingMdc(UserEvent event, UserInfo userInfo, long aggregateVersion, MdcAutoClosable mdc) {
+    mdc.put("userAggregateId", event.getUserId());
+    mdc.put("userAggregateVersion", aggregateVersion);
+    mdc.put("eventType", event.getClass().getName());
+    mdc.put("authorizedUserSubjectId", userInfo.getUserId());
+    mdc.put("authorizedUserName", userInfo.getUserName());
+    materializedViewHandlingDebug(event);
   }
 
-  private void handleDebug(Object event) {
-    LOGGER.debug("Projecting state change from: {}", event);
+  private void materializedViewHandlingDebug(Object event) {
+    LOGGER.debug("Materializing view from: {}", event);
   }
 }

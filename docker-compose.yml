@@ -66,13 +66,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker,dev
       - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI=${SSO_BASEURL}/auth/realms/yardsale/protocol/openid-connect/certs
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://yardsale-app-db:5432/yardsale
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI=http://localhost:8999/auth/realms/yardsale/protocol/openid-connect/certs
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5439/yardsale
       - SPRING_DATASOURCE_USERNAME=yardsale
       - SPRING_DATASOURCE_PASSWORD=yardsale
-    ports:
-      - 8081:80
-      - 8000:8000
+    network_mode: host
     depends_on:
       - yardsale-app-db
       - yardsale-axonserver

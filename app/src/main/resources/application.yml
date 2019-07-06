@@ -16,7 +16,7 @@ logging:
 
 axon:
   axonserver:
-    servers: yardsale-axonserver
+    servers: localhost
   serializer:
     events: jackson
 
@@ -56,4 +56,4 @@ yardsale.secure-data-secret: a very secure secret, you will never guess this!!!!
 spring.profiles: docker
 
 server:
-  port: 80
+  port: 8081

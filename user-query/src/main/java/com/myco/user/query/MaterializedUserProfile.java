@@ -6,16 +6,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Objects;
 
-@Entity public class UserProfileContainer {
+@Entity public class MaterializedUserProfile {
 
   @Id private String id;
 
   @Column(columnDefinition = "text") @Convert(converter = UserProfileConverter.class) private UserProfileImpl userProfile;
 
-  UserProfileContainer() {
+  MaterializedUserProfile() {
   }
 
-  UserProfileContainer(UserProfileImpl userProfile) {
+  MaterializedUserProfile(UserProfileImpl userProfile) {
     this.id = userProfile.getUserId();
     this.userProfile = userProfile;
   }
@@ -37,13 +37,13 @@ import java.util.Objects;
   }
 
   @Override public String toString() {
-    return "UserProfileContainer{" + "id='" + id + '\'' + ", userProfile=" + userProfile + '}';
+    return "MaterializedUserProfile{" + "id='" + id + '\'' + ", userProfile=" + userProfile + '}';
   }
 
   @Override public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof UserProfileContainer)) return false;
-    UserProfileContainer that = (UserProfileContainer) o;
+    if (!(o instanceof MaterializedUserProfile)) return false;
+    MaterializedUserProfile that = (MaterializedUserProfile) o;
     return Objects.equals(id, that.id) && Objects.equals(userProfile, that.userProfile);
   }
 

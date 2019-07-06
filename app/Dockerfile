@@ -15,6 +15,7 @@ RUN bash -c 'chmod 777 /wait-for-it.sh'
 ENV JAVA_OPTS ""
 ENV SPRING_PROFILES_ACTIVE docker
 
-EXPOSE 80
+EXPOSE 8081
+EXPOSE 8000
 
 ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar

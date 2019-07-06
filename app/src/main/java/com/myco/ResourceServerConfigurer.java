@@ -86,7 +86,6 @@ public class ResourceServerConfigurer extends WebSecurityConfigurerAdapter {
         principalBuilder.email(sourceJwt.getClaimAsString("email"));
       }
 
-      // TODO: what about credentials........public keys??? what would go here??? Presently passing null as last argument below!
       return new AuthToken(sourceJwt, authorities, principalBuilder.build(), null);
     };
   }

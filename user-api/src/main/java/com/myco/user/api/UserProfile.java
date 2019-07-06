@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.myco.api.UnitsDim;
 import com.myco.api.UnitsWeight;
 
-@JsonSerialize(as = UserProfile.class)
 public interface UserProfile {
 
   String getUserId();
