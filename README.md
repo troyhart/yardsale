@@ -16,8 +16,8 @@ curl --request POST \
   --header 'authorization: Basic eWFyZHNhbGUtYXBwOg==' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=password \
-  --data username=<your keycloak user name> \
-  --data password=<your keycloak passowrd> \
+  --data username= <keycloak user name> \
+  --data password= <keycloak password> \
   --data 'scope=openid email profile'
 ```
 
@@ -26,7 +26,7 @@ Check SSO User Info:
 ```text
 curl --request GET \
   --url http://localhost:8999/auth/realms/yardsale/protocol/openid-connect/userinfo \
-  --header 'authorization: Bearer <your.access.token> \
+  --header 'authorization: Bearer <your.access.token>'
 ```
 
 Access Token Info (ie. Info from JWT bearer token parsed by the resource server -- yardsale):
@@ -34,7 +34,7 @@ Access Token Info (ie. Info from JWT bearer token parsed by the resource server 
 ```text
 curl --request GET \
   --url http://localhost:8081/userInfo \
-  --header 'authorization: Bearer <your.access.token> \
+  --header 'authorization: Bearer <your.access.token>'
 ```
 
 Create a Yardsale User Profile:
