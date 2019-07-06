@@ -55,5 +55,5 @@ Fetch a Yardsale User Profile:
 ```text
 curl --request GET \
   --url http://localhost:8081/users/<keycloak.subject.id> \
-  --header 'authorization: Bearer <your.access.token> \
+  --header 'authorization: Bearer <your.access.token>'
 ```
