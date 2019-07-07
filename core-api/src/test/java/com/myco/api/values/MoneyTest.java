@@ -9,36 +9,55 @@ import java.util.Currency;
 
 public class MoneyTest {
 
-  @Test
-  public void test0() {
-    Money m1 = new Money.Builder().value("12.4999").currency(Currency.getInstance("USD")).build();
-    Money m2 = new Money.Builder().value("25").currency(Currency.getInstance("USD")).build();
-    Money result = m1.add(m2);
-    Assert.assertEquals("37.50", result.getValue());
-  }
-
-  @Test
-  public void test1() {
-    Money m1 = new Money.Builder().value("12.4999").build();// USD by default
-    Money m2 = new Money.Builder().value("25").currency(Currency.getInstance("USD")).build();
-    Money result = m1.add(m2);
-    Assert.assertEquals("37.50", result.getValue());
-  }
-
-  @Test(expected = V8NException.class)
-  public void test2() {
-    Money m1 = new Money.Builder().value("12.4999").currency(Currency.getInstance("USD")).build();
-    Money m2 = new Money.Builder().value("25").currency(Currency.getInstance("JPY")).build();
+  @Test(expected = V8NException.class) public void testCantAddMixedCurrencies() {
+    Money m1 = new Money.Builder().amount("12.4999").currency(Currency.getInstance("USD")).build();
+    Money m2 = new Money.Builder().amount(25).currency(Currency.getInstance("JPY")).build();
     m1.add(m2);
+    System.out.println(String
+        .format("OOOOPS! I was expecting a validation exception for providing monies with mixed currencies: %s AND %s", m1, m2));
   }
 
-  @Test(expected = V8NException.class)
-  public void test3() {
-    Money m1 = new Money.Builder().value("12x4999").build();
+  @Test(expected = NumberFormatException.class) public void testCantBuildMoneyWithNonNumericAmount_12x4999() {
+    new Money.Builder().amount("12x4999").build();
   }
 
-  @Test(expected = V8NException.class)
-  public void test4() {
-    Money m1 = new Money("12x4999", Currency.getInstance("USD"));
+  @Test(expected = NumberFormatException.class) public void testCantBuildMoneyWithNonNumericAmount__100() {
+    new Money.Builder().amount("_100").build();
+  }
+
+  @Test public void testCantBuildMoneyWithCommasInAmount() {
+    new Money.Builder().amount("1,000").build();
+  }
+
+  @Test public void testCanBuildMoneyWithDollarSignPrefixedAmount() {
+    new Money.Builder().amount("$100").build();
+  }
+
+  @Test public void testCanBuildMoneyWithDecimalPointInAmount() {
+    new Money.Builder().amount("100.01").build();
+  }
+
+  @Test public void testBuilderWithIntAmount() {
+    Money m1 = new Money.Builder().amount("12.4999").build();
+    Money m2 = new Money.Builder().amount(25).build();
+    Money expected = new Money.Builder().amount("37.50").build();
+    Assert.assertEquals(expected, m1.add(m2));
+    System.out.println(String.format("%s + %s == %s", m1, m2, expected));
+  }
+
+  @Test public void testBuilderWithNegativeIntAmount() {
+    Money m1 = new Money.Builder().amount("12.4999").build();
+    Money m2 = new Money.Builder().amount(-25).build();
+    Money expected = new Money.Builder().amount("-12.50").build();
+    Assert.assertEquals(expected, m1.add(m2));
+    System.out.println(String.format("%s + %s == %s", m1, m2, expected));
+  }
+
+  @Test public void testSubtract() {
+    Money m1 = new Money.Builder().amount("12.5").build();
+    Money m2 = new Money.Builder().amount(25).build();
+    Money expected = new Money.Builder().amount("-12.50").build();
+    Assert.assertEquals(expected, m1.subtract(m2));
+    System.out.println(String.format("%s - %s == %s", m1, m2, expected));
   }
 }

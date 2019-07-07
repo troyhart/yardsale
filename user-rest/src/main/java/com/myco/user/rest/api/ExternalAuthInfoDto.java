@@ -2,7 +2,7 @@ package com.myco.user.rest.api;
 
 import com.myco.user.api.commands.CreateUser;
 import com.myco.user.api.commands.UpdateExternalAuthInfo;
-import com.myco.utils.values.ObfuscatedToStringProperty;
+import com.myco.util.values.ObfuscatedToStringProperty;
 import org.springframework.util.Assert;
 
 public class ExternalAuthInfoDto {

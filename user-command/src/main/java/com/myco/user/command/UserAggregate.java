@@ -9,7 +9,7 @@ import com.myco.user.api.events.UserCreated;
 import com.myco.user.api.events.UserPreferencesUpdated;
 import com.myco.util.crypto.CryptoService;
 import com.myco.util.v8n.V8NException;
-import com.myco.utils.values.ObfuscatedToStringProperty;
+import com.myco.util.values.ObfuscatedToStringProperty;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.annotation.MetaDataValue;

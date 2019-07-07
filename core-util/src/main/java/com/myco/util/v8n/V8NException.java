@@ -1,12 +1,12 @@
 package com.myco.util.v8n;
 
-import com.myco.utils.values.ErrorMessage;
+import com.myco.util.values.ErrorMessage;
 
 public class V8NException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  public static final void ifError(ErrorMessage errorMessage) {
+  public static void ifError(ErrorMessage errorMessage) {
     if (errorMessage != null) {
       throw new V8NException(errorMessage);
     }

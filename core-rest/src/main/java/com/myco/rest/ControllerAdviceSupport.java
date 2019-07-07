@@ -1,7 +1,7 @@
 package com.myco.rest;
 
 import com.myco.util.v8n.V8NException;
-import com.myco.utils.values.ErrorMessage;
+import com.myco.util.values.ErrorMessage;
 import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.modelling.command.ConflictingAggregateVersionException;
 import org.slf4j.Logger;

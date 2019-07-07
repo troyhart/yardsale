@@ -1,26 +1,32 @@
-package com.myco.utils.values
+package com.myco.util.values
+
+import com.myco.util.v8n.V8NException
 
 interface Validatable {
   fun validate(): ErrorMessage?
+
+  fun raiseV8NExceptionIfNotValid() {
+    V8NException.ifError(validate())
+  }
 }
 
 data class ErrorMessage(
-  val code: String?,
-  val index: Any?,
-  val message: String,
-  val details: List<ErrorMessage>
+    val code: String?,
+    val index: Any?,
+    val message: String,
+    val details: List<ErrorMessage>
 ) {
 
   private constructor(builder: Builder) : this(
-    builder.code,
-    builder.index,
-    builder.message,
-    builder.details
+      builder.code,
+      builder.index,
+      builder.message,
+      builder.details
   )
 
   fun toBuilder(): ErrorMessage.Builder {
     val builder: ErrorMessage.Builder = ErrorMessage.Builder()
-            .code(code).index(index).message(message)
+        .code(code).index(index).message(message)
     details.forEach { detail ->
       run {
         builder.detail(detail)

@@ -1,6 +1,6 @@
 package com.myco.util.crypto;
 
-import com.myco.utils.values.ObfuscatedToStringProperty;
+import com.myco.util.values.ObfuscatedToStringProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -122,8 +122,7 @@ public class CryptoService {
     // Create an instance of PBKDF2 and derive a key.
     PBEKeySpec pwSpec = new PBEKeySpec(secret.getValue().toCharArray(), salt, PBKDF2_ITERATIONS, ALGORITHM_KEY_SIZE);
     SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(PBKDF2_NAME);
-    byte[] key = keyFactory.generateSecret(pwSpec).getEncoded();
-    return key;
+    return keyFactory.generateSecret(pwSpec).getEncoded();
   }
 
 

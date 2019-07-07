@@ -1,6 +1,6 @@
 package com.myco.util.v8n;
 
-import com.myco.utils.values.ErrorMessage;
+import com.myco.util.values.ErrorMessage;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +20,7 @@ public class V8NAssert {
    *
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage hasText(String value, String name) {
+  public static ErrorMessage hasText(String value, String name) {
     return hasText(value, name, null);
   }
 
@@ -37,7 +37,7 @@ public class V8NAssert {
    *
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage hasText(String value, String name, Object index) {
+  public static ErrorMessage hasText(String value, String name, Object index) {
     boolean valid = StringUtils.hasText(value);
     return valid ? null : new ErrorMessage.Builder().code(name).message("null/blank value").index(index).build();
   }
@@ -52,7 +52,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage requiredInput(String value, String name) {
+  public static ErrorMessage requiredInput(String value, String name) {
     return requiredInput(value, name, null);
   }
 
@@ -68,7 +68,7 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage requiredInput(String value, String name, Object index) {
+  public static ErrorMessage requiredInput(String value, String name, Object index) {
     boolean hasText = StringUtils.hasText(value);
     boolean valid = hasText && value.length() == value.trim().length();
     return valid ? null
@@ -88,7 +88,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage requiredInput(Collection<String> value, String name) {
+  public static ErrorMessage requiredInput(Collection<String> value, String name) {
     ErrorMessage.Builder errorMsgBuilder = new ErrorMessage.Builder().code(name).message("input errors detected");
     ErrorMessage emsg = notEmpty(value, name);
     if (emsg == null) {
@@ -114,7 +114,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage optionalInput(String value, String name) {
+  public static ErrorMessage optionalInput(String value, String name) {
     return optionalInput(value, name, null);
   }
 
@@ -130,9 +130,9 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage optionalInput(String value, String name, Object index) {
+  public static ErrorMessage optionalInput(String value, String name, Object index) {
     boolean hasText = StringUtils.hasText(value);
-    boolean valid = !hasText || hasText && value.length() == value.trim().length();
+    boolean valid = !hasText || value.length() == value.trim().length();
     return valid ? null
         : new ErrorMessage.Builder().code(name).index(index)
             .message("optional input must not includes leading/trailing whitespace").build();
@@ -147,7 +147,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage optionalInput(Collection<String> value, String name) {
+  public static ErrorMessage optionalInput(Collection<String> value, String name) {
     if (CollectionUtils.isEmpty(value)) return null;
     ErrorMessage.Builder errorMsgBuilder = new ErrorMessage.Builder().code(name).message("input errors detected");
     int i = 0;
@@ -169,7 +169,7 @@ public class V8NAssert {
    *          The error message to include if the given value does not evaluate to true
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage isTrue(boolean value, String name, String errorMessage) {
+  public static ErrorMessage isTrue(boolean value, String name, String errorMessage) {
     return value ? null : new ErrorMessage.Builder().code(name).message(errorMessage).build();
   }
 
@@ -187,7 +187,7 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage isTrue(boolean value, String name, String errorMessage, Object index) {
+  public static ErrorMessage isTrue(boolean value, String name, String errorMessage, Object index) {
     return value ? null : new ErrorMessage.Builder().code(name).index(index).message(errorMessage).build();
   }
 
@@ -201,7 +201,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notEmpty(Map<?, ?> value, String name) {
+  public static ErrorMessage notEmpty(Map<?, ?> value, String name) {
     return notEmpty(value, name, 0);
   }
 
@@ -217,7 +217,7 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notEmpty(Map<?, ?> value, String name, Object index) {
+  public static ErrorMessage notEmpty(Map<?, ?> value, String name, Object index) {
     return !CollectionUtils.isEmpty(value) ? null
         : new ErrorMessage.Builder().code(name).index(index).message("empty map").build();
   }
@@ -232,7 +232,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notEmpty(Collection<?> value, String name) {
+  public static ErrorMessage notEmpty(Collection<?> value, String name) {
     return notEmpty(value, name, 0);
   }
 
@@ -248,7 +248,7 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notEmpty(Collection<?> value, String name, Object index) {
+  public static ErrorMessage notEmpty(Collection<?> value, String name, Object index) {
     return !CollectionUtils.isEmpty(value) ? null
         : new ErrorMessage.Builder().code(name).index(index).message("empty collection").build();
   }
@@ -263,7 +263,7 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notNull(Object value, String name) {
+  public static ErrorMessage notNull(Object value, String name) {
     return notNull(value, name, 0);
   }
 
@@ -279,7 +279,7 @@ public class V8NAssert {
    *          for collection based input; the position/index within the collection
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage notNull(Object value, String name, Object index) {
+  public static ErrorMessage notNull(Object value, String name, Object index) {
     return (value != null) ? null
         : new ErrorMessage.Builder().code(name).message("required value must not be null").build();
   }
@@ -294,11 +294,11 @@ public class V8NAssert {
    *          The field/attribute name that will be provided as the code of the ErrorMessage, if the value is invalid.
    * @return null when the given input is valid, an ErrorMessage otherwise.
    */
-  public static final ErrorMessage assertTrackingNumberIsLogical(String value, String name) {
+  public static ErrorMessage assertTrackingNumberIsLogical(String value, String name) {
     return assertTrackingNumberIsLogical(value, name, 0);
   }
 
-  public static final ErrorMessage assertTrackingNumberIsLogical(String value, String name, Object index) {
+  public static ErrorMessage assertTrackingNumberIsLogical(String value, String name, Object index) {
 
     ErrorMessage emsg = optionalInput(value, name);
     if (emsg == null && StringUtils.hasText(value)) {
@@ -330,7 +330,7 @@ public class V8NAssert {
     return emsg;
   }
 
-  private static final String INVALID_TRK_NO_LENGTH_MSG = "Invalid length (must be 12, 15, 20 or 22)";
-  private static final String NON_DIGIT_TRK_NO_CHAR_MSG =
+  private static String INVALID_TRK_NO_LENGTH_MSG = "Invalid length (must be 12, 15, 20 or 22)";
+  private static String NON_DIGIT_TRK_NO_CHAR_MSG =
       "Contains 1 or more invalid characters (must include only numeric digits)";
 }

@@ -2,7 +2,7 @@ package com.myco;
 
 import com.myco.api.values.UserInfo;
 import com.myco.auth.AuthContext;
-import com.myco.utils.values.ErrorMessage;
+import com.myco.util.values.ErrorMessage;
 import com.myco.util.slf4j.MdcAutoClosable;
 import org.axonframework.axonserver.connector.command.AxonServerCommandBus;
 import org.axonframework.axonserver.connector.query.AxonServerQueryBus;

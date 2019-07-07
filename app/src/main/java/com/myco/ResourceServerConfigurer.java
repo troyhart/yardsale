@@ -2,7 +2,7 @@ package com.myco;
 
 import com.myco.api.values.UserInfo;
 import com.myco.auth.AuthToken;
-import com.myco.utils.values.ObfuscatedToStringProperty;
+import com.myco.util.values.ObfuscatedToStringProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;

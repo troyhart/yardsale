@@ -3,14 +3,8 @@ package com.myco.api.values
 import com.myco.api.UnitsDim
 import com.myco.api.UnitsWeight
 import com.myco.util.v8n.V8NAssert
-import com.myco.util.v8n.V8NException
-import com.myco.utils.values.ErrorMessage
-import com.myco.utils.values.Validatable
-import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
-import java.text.NumberFormat
-import java.util.*
+import com.myco.util.values.ErrorMessage
+import com.myco.util.values.Validatable
 
 
 data class Address(
@@ -20,6 +14,11 @@ data class Address(
     val zip: String,
     val country: String?
 ) : Validatable {
+
+  init {
+    raiseV8NExceptionIfNotValid()
+  }
+
   private constructor(builder: Builder) : this(
       builder.street,
       builder.city,
@@ -65,6 +64,10 @@ data class Weight(
     val units: UnitsWeight
 ) : Validatable {
 
+  init {
+    raiseV8NExceptionIfNotValid()
+  }
+
   override fun validate(): ErrorMessage? {
     val emb: ErrorMessage.Builder = ErrorMessage.Builder()
         .code("Weight")
@@ -88,6 +91,11 @@ data class Dimensions(
     val height: Double,
     val units: UnitsDim
 ) : Validatable {
+
+  init {
+    raiseV8NExceptionIfNotValid()
+  }
+
   private constructor(builder: Builder) : this(
       builder.length,
       builder.width,
@@ -140,114 +148,6 @@ data class Dimensions(
             )
         )
     return emb.buildIfDetailsPresent()
-  }
-}
-
-data class Money(
-    val value: String,
-    val currency: Currency
-) : Validatable {
-
-  init {
-    V8NException.ifError(this.validate())
-  }
-
-  private constructor(builder: Builder) : this(
-      builder.value,
-      builder.currency
-  )
-
-  class Builder {
-    lateinit var value: String
-      private set
-    var currency: Currency = Currency.getInstance("USD")
-      private set
-
-    fun value(value: String) = apply { this.value = value }
-    fun currency(currency: Currency) = apply { this.currency = currency }
-    fun build() = Money(this)
-  }
-
-  override fun validate(): ErrorMessage? {
-    return ErrorMessage.Builder()
-        .code("Money")
-        .detail(V8NAssert.notNull(value, "value"))
-        .detail(V8NAssert.notNull(currency, "currency"))
-        .detail(validateIsNumeric(value))
-        .buildIfDetailsPresent()
-  }
-
-  override fun toString(): String {
-    val usdCostFormat = NumberFormat.getCurrencyInstance()
-    usdCostFormat.minimumFractionDigits = currency.defaultFractionDigits
-    usdCostFormat.maximumFractionDigits = currency.defaultFractionDigits
-    return String.format("%s (%s)", usdCostFormat.format(value.toDouble()), currency.displayName)
-  }
-
-  fun toBigDecimal(): BigDecimal {
-    V8NException.ifError(validateIsNumeric(value))
-    return BigDecimal(value, mathContext())
-  }
-
-  fun add(money: Money): Money {
-    throwIfCurrencyMismatch(money.currency)
-    val thisBD = toBigDecimal()
-    val thatBD = money.toBigDecimal()
-    return instance(thisBD.add(thatBD), currency)
-  }
-
-  fun subtract(money: Money): Money {
-    throwIfCurrencyMismatch(money.currency)
-    val thisBD = toBigDecimal()
-    val thatBD = money.toBigDecimal()
-    return instance(thisBD.subtract(thatBD), currency)
-  }
-
-  fun multiply(multiplicand: Int): Money {
-    return instance(toBigDecimal().multiply(BigDecimal(multiplicand), mathContext()), currency)
-  }
-
-  fun multiply(multiplicand: Double): Money {
-    return instance(toBigDecimal().multiply(BigDecimal(multiplicand), mathContext()), currency)
-  }
-
-  fun multiply(multiplicand: BigDecimal): Money {
-    return instance(toBigDecimal().multiply(multiplicand, mathContext()), currency)
-  }
-
-  fun divide(divisor: Int): Money {
-    return instance(toBigDecimal().divide(BigDecimal(divisor), mathContext()), currency)
-  }
-
-  fun divide(divisor: Double): Money {
-    return instance(toBigDecimal().divide(BigDecimal(divisor), mathContext()), currency)
-  }
-
-  fun divide(divisor: BigDecimal): Money {
-    return instance(toBigDecimal().divide(divisor, mathContext()), currency)
-  }
-
-  private fun instance(value: BigDecimal, currency: Currency): Money {
-    val m = Money(value.toPlainString(), currency)
-    V8NException.ifError(m.validate())
-    return m
-  }
-
-  private fun validateIsNumeric(value: String): ErrorMessage? {
-    return when (value.toDoubleOrNull() == null) {
-      true -> ErrorMessage.Builder().code("value").message("non-numeric value not allowed").build()
-      false -> null
-    }
-  }
-
-  private fun throwIfCurrencyMismatch(otherCurrency: Currency) {
-    if (currency != otherCurrency) {
-      V8NException.ifError(ErrorMessage.Builder().code("value").message("currency mismatch").build())
-    }
-  }
-
-  private fun mathContext(): MathContext? {
-    return MathContext(currency.defaultFractionDigits + 2, RoundingMode.HALF_UP)
   }
 }
 

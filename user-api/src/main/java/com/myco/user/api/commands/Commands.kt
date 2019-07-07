@@ -3,9 +3,9 @@ package com.myco.user.api.commands
 import com.myco.api.UnitsDim
 import com.myco.api.UnitsWeight
 import com.myco.util.v8n.V8NAssert
-import com.myco.utils.values.ErrorMessage
-import com.myco.utils.values.ObfuscatedToStringProperty
-import com.myco.utils.values.Validatable
+import com.myco.util.values.ErrorMessage
+import com.myco.util.values.ObfuscatedToStringProperty
+import com.myco.util.values.Validatable
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 

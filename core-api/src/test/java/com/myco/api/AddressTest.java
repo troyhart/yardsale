@@ -1,7 +1,7 @@
 package com.myco.api;
 
 import com.myco.api.values.Address;
-import com.myco.utils.values.ErrorMessage;
+import com.myco.util.values.ErrorMessage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ import static org.junit.Assert.fail;
 public class AddressTest {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
   }
 
   @Test
