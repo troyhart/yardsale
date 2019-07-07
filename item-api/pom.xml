@@ -18,6 +18,11 @@
   <packaging>jar</packaging>
 
   <dependencies>
+    <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>core-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

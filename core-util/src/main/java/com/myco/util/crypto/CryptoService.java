@@ -21,10 +21,8 @@ import java.util.Base64;
  * An application service
  *
  * @author troyh
- *
  */
-@Component
-public class CryptoService {
+@Component public class CryptoService {
 
   private final static String ALGORITHM_NAME = "AES/GCM/NoPadding";
   private final static int ALGORITHM_NONCE_SIZE = 12;
@@ -52,12 +50,7 @@ public class CryptoService {
       ciphertextAndNonce =
           doEncryption(new ObfuscatedToStringProperty<>(plaintext.getValue().getBytes(StandardCharsets.UTF_8)), key);
     }
-    catch (InvalidKeyException
-        | InvalidAlgorithmParameterException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException
-        | IllegalBlockSizeException
-        | BadPaddingException e) {
+    catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
       throw new RuntimeException("Bug Alert! Unable to encrypt data", e);
     }
 
@@ -97,12 +90,7 @@ public class CryptoService {
       return new ObfuscatedToStringProperty<>(
           new String(doDecryption(ciphertextAndNonce, key).getValue(), StandardCharsets.UTF_8));
     }
-    catch (InvalidKeyException
-        | InvalidAlgorithmParameterException
-        | IllegalBlockSizeException
-        | BadPaddingException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException e) {
+    catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
       throw new RuntimeException("Unable to decrypt data", e);
     }
   }

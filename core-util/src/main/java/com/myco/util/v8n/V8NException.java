@@ -1,5 +1,6 @@
 package com.myco.util.v8n;
 
+
 import com.myco.util.values.ErrorMessage;
 
 public class V8NException extends RuntimeException {
