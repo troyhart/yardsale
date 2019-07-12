@@ -4,6 +4,7 @@ import com.myco.util.v8n.V8NException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Currency;
 
@@ -30,6 +31,17 @@ public class MoneyTest {
 
   @Test(expected = NumberFormatException.class) public void testCantBuildMoneyWithNonNumericAmount__100() {
     new Money.Builder().amount("_100").build();
+  }
+
+  @Test
+  public void testInvalidConstruction() {
+    try {
+      Money m = new Money(new BigDecimal(10), Currency.getInstance("USD"));
+      Assert.fail("Expecting failure for money: " + m.toString(USD_CURRENCY_FORMAT));
+    }
+    catch (V8NException e) {
+      System.out.println("Expected failure: " + e.getErrorMessage());
+    }
   }
 
   @Test public void testCantBuildMoneyWithCommasInAmount() {
