@@ -31,7 +31,7 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
       SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository
   ) {
     transactionTemplate = new TransactionTemplate(platformTransactionManager);
-    transactionTemplate.setPropagationBehavior(Propagation.REQUIRED.value());
+    transactionTemplate.setPropagationBehavior(Propagation.REQUIRES_NEW.value());
     this.handlerFailureRecordRepository = handlerFailureRecordRepository;
     this.sequenceBlacklistRecordRepository = sequenceBlacklistRecordRepository;
   }
@@ -46,13 +46,17 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
         INSTANCE;
   }
 
-  private void handleBlacklisting(
+  private SequenceBlacklistRecord handleBlacklisting(
       FailureRecord failureRecord, EventMessage<?> eventMessage, EventMessageHandler eventMessageHandler
   ) {
-    SequenceBlacklistRecord sequenceBlacklistRecord = sequenceBlacklistRecordRepository
-        .save(new SequenceBlacklistRecord(eventMessage, eventMessageHandler.getTargetType()));
-    LOGGER.error("Blacklisting Sequence {}", sequenceBlacklistRecord.getId());
     // TODO: deliver the event message to the dead letter queue
+    return transactionTemplate.execute(new TransactionCallback<SequenceBlacklistRecord>() {
+      @Override
+      public SequenceBlacklistRecord doInTransaction(TransactionStatus status) {
+        return sequenceBlacklistRecordRepository
+            .save(new SequenceBlacklistRecord(eventMessage, eventMessageHandler.getTargetType()));
+      }
+    });
   }
 
   /*
@@ -85,7 +89,9 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
           .put("trackingProcessorFailureRecordAttempts", failureRecord.getFailureCount());
       LOGGER.error("Tracking Processor Error", e);
       if (failureRecord.attemptsExhausted()) {
-        handleBlacklisting(failureRecord, eventMessage, eventMessageHandler);
+        SequenceBlacklistRecord sequenceBlacklistRecord =
+            handleBlacklisting(failureRecord, eventMessage, eventMessageHandler);
+        LOGGER.warn("Blacklisting Sequence {}", sequenceBlacklistRecord.getId());
       }
       else {
         LOGGER.debug("Will retry event processing");
