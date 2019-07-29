@@ -12,15 +12,13 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.io.IOException;
 
-@Converter public abstract class JacksonAttributeConverter<T> implements AttributeConverter<T, String> {
+@Converter
+public abstract class JacksonAttributeConverter<T> implements AttributeConverter<T, String> {
 
-  private static ObjectMapper objectMapper = new ObjectMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .registerModule(new KotlinModule())
-      .registerModule(new ParameterNamesModule())
-      .registerModule(new Jdk8Module())
-      .registerModule(new JavaTimeModule())
-      ;
+  private static ObjectMapper objectMapper =
+      new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .registerModule(new KotlinModule()).registerModule(new ParameterNamesModule())
+          .registerModule(new Jdk8Module()).registerModule(new JavaTimeModule());
 
   private Class<T> type;
 
@@ -28,7 +26,8 @@ import java.io.IOException;
     this.type = type;
   }
 
-  @Override public String convertToDatabaseColumn(T attribute) {
+  @Override
+  public String convertToDatabaseColumn(T attribute) {
     try {
       return objectMapper.writer().writeValueAsString(attribute);
     }
@@ -37,7 +36,8 @@ import java.io.IOException;
     }
   }
 
-  @Override public T convertToEntityAttribute(String dbData) {
+  @Override
+  public T convertToEntityAttribute(String dbData) {
     try {
       return objectMapper.readerFor(type).readValue(dbData);
     }

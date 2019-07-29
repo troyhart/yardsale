@@ -37,27 +37,32 @@ public class UserAggregate {
   }
 
   @CommandHandler
-  UserAggregate(CreateUser command, @MetaDataValue(USER_INFO) UserInfo userInfo, CryptoService encryptionService,
-      @Qualifier("secureDataSecret") ObfuscatedToStringProperty<String> secureDataSecret) {
+  UserAggregate(
+      CreateUser command, @MetaDataValue(USER_INFO) UserInfo userInfo, CryptoService encryptionService,
+      @Qualifier("secureDataSecret") ObfuscatedToStringProperty<String> secureDataSecret
+  ) {
     LOGGER.debug("Preparing to handle: {}", command);
     Assert.notNull(userInfo, "null userInfo");
     V8NException.ifError(command.validate());
     String encryptedKey = encryptionService.encryptString(secureDataSecret, command.getExternalApiKey());
 
     AggregateLifecycle.apply(new UserCreated(command.getUserId()));
-    AggregateLifecycle.apply(new ExternalAuthInfoUpdated(command.getUserId(), encryptedKey, command.getExternalUserId()));
+    AggregateLifecycle
+        .apply(new ExternalAuthInfoUpdated(command.getUserId(), encryptedKey, command.getExternalUserId()));
   }
 
   @CommandHandler
-  void handle(UpdateExternalAuthInfo command, @MetaDataValue(USER_INFO) UserInfo userInfo, CryptoService encryptionService,
-      @Qualifier("secureDataSecret") ObfuscatedToStringProperty<String> secureDataSecret) {
+  void handle(
+      UpdateExternalAuthInfo command, @MetaDataValue(USER_INFO) UserInfo userInfo, CryptoService encryptionService,
+      @Qualifier("secureDataSecret") ObfuscatedToStringProperty<String> secureDataSecret
+  ) {
     LOGGER.debug("Preparing to handle: {}", command);
     Assert.notNull(userInfo, "null userInfo");
     V8NException.ifError(command.validate());
     String encryptedKey = encryptionService.encryptString(secureDataSecret, command.getExternalApiKey());
 
-    AggregateLifecycle
-        .apply(new ExternalAuthInfoUpdated(command.getUserId(), encryptedKey, externalUserId(command.getExternalUserId())));
+    AggregateLifecycle.apply(
+        new ExternalAuthInfoUpdated(command.getUserId(), encryptedKey, externalUserId(command.getExternalUserId())));
   }
 
   @CommandHandler

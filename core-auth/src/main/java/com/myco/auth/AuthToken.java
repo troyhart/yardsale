@@ -13,8 +13,9 @@ public final class AuthToken extends JwtAuthenticationToken {
   private UserInfo principal;
   private Object credentials;
 
-  public AuthToken(Jwt jwt, Collection<? extends GrantedAuthority> authorities, UserInfo principal,
-      Object credentials) {
+  public AuthToken(
+      Jwt jwt, Collection<? extends GrantedAuthority> authorities, UserInfo principal, Object credentials
+  ) {
     super(jwt, authorities);
     this.principal = principal;
     this.credentials = credentials;

@@ -24,12 +24,15 @@ import java.util.stream.Collectors;
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class ResourceServerConfigurer extends WebSecurityConfigurerAdapter {
 
-  @Bean public ObfuscatedToStringProperty<String> secureDataSecret(
-      @Value("${yardsale.secure-data-secret}") String secureDataSecret) {
+  @Bean
+  public ObfuscatedToStringProperty<String> secureDataSecret(
+      @Value("${yardsale.secure-data-secret}") String secureDataSecret
+  ) {
     return new ObfuscatedToStringProperty<>(secureDataSecret);
   }
 
-  @Override public void configure(HttpSecurity http) throws Exception {
+  @Override
+  public void configure(HttpSecurity http) throws Exception {
     // @formatter:off
     http.authorizeRequests()
       .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()

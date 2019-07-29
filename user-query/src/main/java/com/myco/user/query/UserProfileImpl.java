@@ -3,27 +3,37 @@ package com.myco.user.query;
 import com.myco.api.UnitsDim;
 import com.myco.api.UnitsWeight;
 import com.myco.user.api.UserProfile;
-import org.springframework.util.StringUtils;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.time.Instant;
 import java.util.Objects;
 
+@Entity(name = "yardsale_user_profiles")
 public class UserProfileImpl implements UserProfile {
 
+  @Id
   private String userId;
 
+  @Column
   private String externalUserId;
+  @Column
   private String externalApiKeyEncrypted;
-
+  @Column
+  // TODO: add converter to store enum name rather than the ordinal!!!
   private UnitsDim dimUnits;
+  @Column
+  // TODO: add converter to store enum name rather than the ordinal!!!
   private UnitsWeight weightUnits;
-
+  @Column
   private String lastModifiedBy;
+  @Column
   private String lastModifiedById;
-
-  private Instant setLastModifiedInstant;
-
-  private long setAggregateVersion;
+  @Column
+  private Instant lastModifiedInstant;
+  @Column
+  private long aggregateVersion;
 
   public String getUserId() {
     return userId;
@@ -54,7 +64,8 @@ public class UserProfileImpl implements UserProfile {
     return this;
   }
 
-  @Override public UnitsDim getDimUnits() {
+  @Override
+  public UnitsDim getDimUnits() {
     return dimUnits;
   }
 
@@ -63,7 +74,8 @@ public class UserProfileImpl implements UserProfile {
     return this;
   }
 
-  @Override public UnitsWeight getWeightUnits() {
+  @Override
+  public UnitsWeight getWeightUnits() {
     return weightUnits;
   }
 
@@ -90,25 +102,26 @@ public class UserProfileImpl implements UserProfile {
     return this;
   }
 
-  public Instant getSetLastModifiedInstant() {
-    return setLastModifiedInstant;
+  public Instant getLastModifiedInstant() {
+    return lastModifiedInstant;
   }
 
   UserProfileImpl setLastModifiedInstant(Instant instant) {
-    this.setLastModifiedInstant = instant;
+    this.lastModifiedInstant = instant;
     return this;
   }
 
-  public long getSetAggregateVersion() {
-    return setAggregateVersion;
+  public long getAggregateVersion() {
+    return aggregateVersion;
   }
 
   UserProfileImpl setAggregateVersion(long version) {
-    this.setAggregateVersion = version;
+    this.aggregateVersion = version;
     return this;
   }
 
-  @Override public boolean equals(Object object) {
+  @Override
+  public boolean equals(Object object) {
     if (this == object) return true;
     if (!(object instanceof UserProfileImpl)) return false;
     if (!super.equals(object)) return false;
@@ -116,14 +129,16 @@ public class UserProfileImpl implements UserProfile {
     return Objects.equals(userId, that.userId);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return Objects.hash(super.hashCode(), userId);
   }
 
-  @Override public String toString() {
-    return "UserProfileImpl{" + "userId='" + userId + '\'' + ", externalUserId=" + externalUserId + ", externalApiKeyEncrypted='"
-        + externalApiKeyEncrypted + '\'' + ", lastModifiedBy='" + lastModifiedBy + '\'' + ", lastModifiedById='"
-        + lastModifiedById + '\'' + ", setLastModifiedInstant=" + setLastModifiedInstant + ", setAggregateVersion="
-        + setAggregateVersion + '}';
+  @Override
+  public String toString() {
+    return "UserProfileImpl{" + "userId='" + userId + '\'' + ", externalUserId=" + externalUserId
+        + ", externalApiKeyEncrypted='" + externalApiKeyEncrypted + '\'' + ", lastModifiedBy='" + lastModifiedBy + '\''
+        + ", lastModifiedById='" + lastModifiedById + '\'' + ", setLastModifiedInstant=" + lastModifiedInstant
+        + ", setAggregateVersion=" + aggregateVersion + '}';
   }
 }

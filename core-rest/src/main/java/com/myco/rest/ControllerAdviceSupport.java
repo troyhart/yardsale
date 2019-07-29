@@ -10,13 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.util.WebUtils;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -35,8 +35,9 @@ public interface ControllerAdviceSupport {
   }
 
   @ExceptionHandler(value = CommandExecutionException.class)
-  default ResponseEntity<ErrorMessage> handleCommandExecutionException(CommandExecutionException ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleCommandExecutionException(
+      CommandExecutionException ex, WebRequest request
+  ) {
     String token = UUID.randomUUID().toString();
     logger().error(tagMessage(token, "COMMAND FAILURE; REQUEST: " + request), ex);
     return handleExceptionInternal(ex,
@@ -53,8 +54,9 @@ public interface ControllerAdviceSupport {
   }
 
   @ExceptionHandler(value = HttpMessageNotReadableException.class)
-  default ResponseEntity<ErrorMessage> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException ex, WebRequest request
+  ) {
     return doHandleBadRequest(ex, request);
   }
 
@@ -70,19 +72,22 @@ public interface ControllerAdviceSupport {
 
   @ExceptionHandler(value = {ConflictingAggregateVersionException.class})
   default ResponseEntity<ErrorMessage> handleConflictingAggregateVersionException(
-      ConflictingAggregateVersionException ex, WebRequest request) {
+      ConflictingAggregateVersionException ex, WebRequest request
+  ) {
     return doHandleBadRequest(ex, request);
   }
 
   @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
-  default ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException ex, WebRequest request
+  ) {
     return doHandleBadRequest(ex, request);
   }
 
   @ExceptionHandler(value = {HttpClientErrorException.BadRequest.class})
-  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionBadRequest(HttpClientErrorException.BadRequest ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionBadRequest(
+      HttpClientErrorException.BadRequest ex, WebRequest request
+  ) {
     return doHandleBadRequest(ex, request);
   }
 
@@ -100,28 +105,32 @@ public interface ControllerAdviceSupport {
   }
 
   @ExceptionHandler(value = {HttpClientErrorException.NotFound.class})
-  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionNotFound(HttpClientErrorException.NotFound ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionNotFound(
+      HttpClientErrorException.NotFound ex, WebRequest request
+  ) {
     return doNotFoundHandling(ex, request);
   }
 
   @ExceptionHandler(value = {HttpClientErrorException.Unauthorized.class})
   default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionUnauthorized(
-      HttpClientErrorException.Unauthorized ex, WebRequest request) {
+      HttpClientErrorException.Unauthorized ex, WebRequest request
+  ) {
     logger().error("NOT AUTHORIZED; REQUEST: " + request, ex);
     return handleExceptionInternal(ex, new ErrorMessage.Builder().code(HttpStatus.UNAUTHORIZED.name()).build(),
         new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
   }
 
   @ExceptionHandler(value = {HttpClientErrorException.Forbidden.class})
-  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionForbidden(HttpClientErrorException.Forbidden ex,
-      WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleHttpClientErrorExceptionForbidden(
+      HttpClientErrorException.Forbidden ex, WebRequest request
+  ) {
     logger().error("FORBIDDEN; REQUEST: " + request, ex);
     return handleExceptionInternal(ex, new ErrorMessage.Builder().code(HttpStatus.FORBIDDEN.name()).build(),
         new HttpHeaders(), HttpStatus.FORBIDDEN, request);
   }
 
-  @ExceptionHandler default ResponseEntity<ErrorMessage> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+  @ExceptionHandler
+  default ResponseEntity<ErrorMessage> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
     logger().error("ACCESS DENIED; REQUEST: " + request, ex);
     return handleExceptionInternal(ex, new ErrorMessage.Builder().code(HttpStatus.FORBIDDEN.name()).build(),
         new HttpHeaders(), HttpStatus.FORBIDDEN, request);
@@ -129,7 +138,8 @@ public interface ControllerAdviceSupport {
 
   @ExceptionHandler(value = {MissingServletRequestParameterException.class})
   default ResponseEntity<ErrorMessage> handleMissingServletRequestParameterException(
-      MissingServletRequestParameterException ex, WebRequest request) {
+      MissingServletRequestParameterException ex, WebRequest request
+  ) {
     String token = UUID.randomUUID().toString();
     logger().error(tagMessage(token, "BAD_REQUEST: " + request), ex);
     return handleExceptionInternal(ex,
@@ -137,7 +147,8 @@ public interface ControllerAdviceSupport {
             .build(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
 
-  @ExceptionHandler default ResponseEntity<ErrorMessage> handleException(Exception ex, WebRequest request) {
+  @ExceptionHandler
+  default ResponseEntity<ErrorMessage> handleException(Exception ex, WebRequest request) {
     String token = UUID.randomUUID().toString();
     logger().error(tagMessage(token, "CATCH ALL HANDLER; REQUEST: " + request), ex);
     return new ResponseEntity<>(
@@ -157,8 +168,9 @@ public interface ControllerAdviceSupport {
    * @param status  the response status
    * @param request the current request
    */
-  default ResponseEntity<ErrorMessage> handleExceptionInternal(Exception ex, @Nullable ErrorMessage body,
-      HttpHeaders headers, HttpStatus status, WebRequest request) {
+  default ResponseEntity<ErrorMessage> handleExceptionInternal(
+      Exception ex, @Nullable ErrorMessage body, HttpHeaders headers, HttpStatus status, WebRequest request
+  ) {
 
     if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
       request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);

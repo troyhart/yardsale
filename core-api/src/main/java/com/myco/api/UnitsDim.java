@@ -22,7 +22,6 @@ public enum UnitsDim implements Labeled {
    * @param value
    * @param from
    * @param to
-   *
    * @return the converted value
    */
   public double convert(double value, UnitsDim from, UnitsDim to) {

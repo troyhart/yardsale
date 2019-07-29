@@ -10,16 +10,14 @@ import javax.servlet.ServletRegistration;
 
 public class YardsaleWebApplicationInitializer implements WebApplicationInitializer {
 
-  @Override public void onStartup(ServletContext container) {
+  @Override
+  public void onStartup(ServletContext container) {
 
-    AnnotationConfigWebApplicationContext context
-        = new AnnotationConfigWebApplicationContext();
+    AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
     context.setConfigLocation("com.myco");
     container.addListener(new ContextLoaderListener(context));
 
-    ServletRegistration.Dynamic dispatcher
-        = container.addServlet("dispatcher",
-        new DispatcherServlet(context));
+    ServletRegistration.Dynamic dispatcher = container.addServlet("dispatcher", new DispatcherServlet(context));
     dispatcher.setLoadOnStartup(1);
     dispatcher.addMapping("/");
   }

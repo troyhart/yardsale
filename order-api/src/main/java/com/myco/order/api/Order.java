@@ -2,14 +2,14 @@ package com.myco.order.api;
 
 import com.myco.api.values.Money;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Order {
   String getOrderId();
 
   String getUserId();
 
-  List<String> getStockItemIds();
+  Set<Item> getItems();
 
   OrderStatus getOrderStatus();
 

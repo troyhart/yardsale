@@ -1,5 +1,6 @@
-package com.myco;
+package com.myco.axon.eventhandling;
 
+import com.myco.api.AxonMessageMetadataKeys;
 import com.myco.api.values.UserInfo;
 import com.myco.util.slf4j.MdcAutoClosable;
 import org.axonframework.eventhandling.EventHandler;
@@ -17,12 +18,15 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 @Component
 public class EventLogger {
 
+  public static final EventLogger INSTANCE = new EventLogger();
   private static final Logger LOGGER = LoggerFactory.getLogger(EventLogger.class);
 
   @EventHandler
-  public void on(Object event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
-      @MetaDataValue(USER_INFO) UserInfo userInfo) {
-    try(MdcAutoClosable mdc = new MdcAutoClosable()) {
+  public void on(
+      Object event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
+      @MetaDataValue(AxonMessageMetadataKeys.USER_INFO) UserInfo userInfo
+  ) {
+    try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc.put("yardsaleUserId", userInfo == null ? "ANONYMOUS" : userInfo.getUserId());
       LOGGER.info("Published -> {}", event);
     }

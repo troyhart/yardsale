@@ -5,20 +5,20 @@
   and a sample from the reference manual of Sleuth. -->
 
 <configuration>
-  <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
   <!-- Don't forget to set "spring.application.name" in application.yml -->
   <springProperty
-    scope="context"
-    name="springAppName"
-    source="spring.application.name" />
+      scope="context"
+      name="springAppName"
+      source="spring.application.name"/>
 
-  <conversionRule conversionWord="crlf" converterClass="org.owasp.security.logging.mask.CRLFConverter" />
+  <conversionRule conversionWord="crlf" converterClass="org.owasp.security.logging.mask.CRLFConverter"/>
 
   <!-- Appender to log to console in plain text format -->
   <appender
-    name="CONSOLE"
-    class="ch.qos.logback.core.ConsoleAppender"
+      name="CONSOLE"
+      class="ch.qos.logback.core.ConsoleAppender"
   >
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <!-- Minimum logging level to be presented in the console logs -->
@@ -29,7 +29,7 @@
     >
       <providers>
         <!-- Log all StructuredArgument instances -->
-        <arguments />
+        <arguments/>
         <!-- Log all MDC fields except the ones from Sleuth - we add them
           below under cleaned up names -->
         <mdc>
@@ -39,33 +39,35 @@
           <excludeMdcKeyName>X-Span-Export</excludeMdcKeyName>
         </mdc>
         <!-- Include Exception stack traces -->
-        <stackTrace />
+        <stackTrace/>
         <timestamp>
           <timeZone>UTC</timeZone>
         </timestamp>
         <!-- Assign logger fields to JSON object -->
         <!-- Yes the double "pattern" elements are required! Not sure why though -->
-        <pattern><pattern>
-          {
-          "severity": "%level",
-          "serviceName": "${springAppName:-}",
-          "trace": "%X{X-B3-TraceId:-}",
-          "span": "%X{X-B3-SpanId:-}",
-          "parent": "%X{X-B3-ParentSpanId:-}",
-          "exportable": "%X{X-Span-Export:-}",
-          "pid": ${PID:-},
-          "thread": "%thread",
-          "logger": "%logger",
-          "message": "%crlf(%message)"
-          }
-        </pattern></pattern>
+        <pattern>
+          <pattern>
+            {
+            "severity": "%level",
+            "serviceName": "${springAppName:-}",
+            "trace": "%X{X-B3-TraceId:-}",
+            "span": "%X{X-B3-SpanId:-}",
+            "parent": "%X{X-B3-ParentSpanId:-}",
+            "exportable": "%X{X-Span-Export:-}",
+            "pid": ${PID:-},
+            "thread": "%thread",
+            "logger": "%logger",
+            "message": "%crlf(%message)"
+            }
+          </pattern>
+        </pattern>
       </providers>
     </encoder>
   </appender>
 
   <root level="INFO">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="CONSOLE"/>
   </root>
 
-  <jmxConfigurator />
+  <jmxConfigurator/>
 </configuration>

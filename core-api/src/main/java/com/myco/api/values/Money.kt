@@ -81,12 +81,12 @@ data class Money(
 
   fun add(augend: Money): Money {
     throwIfCurrencyMismatch(augend.currency)
-    return Money(amount.add(augend.amount), currency)
+    return Money(amount.add(augend.amount, mathContext()), currency)
   }
 
   fun subtract(subtrahend: Money): Money {
     throwIfCurrencyMismatch(subtrahend.currency)
-    return Money(amount.subtract(subtrahend.amount), currency)
+    return Money(amount.subtract(subtrahend.amount, mathContext()), currency)
   }
 
   fun multiply(multiplicand: Int): Money {
@@ -109,21 +109,17 @@ data class Money(
     return Money(roundedAmount(), currency)
   }
 
-  private fun roundedAmount(): BigDecimal {
-    return amount.setScale(currency.defaultFractionDigits, roundingMode())
+  fun roundedAmount(): BigDecimal {
+    return amount.setScale(currency.defaultFractionDigits, RoundingMode.HALF_UP)
   }
 
   private fun mathContext(): MathContext {
     return MathContext.DECIMAL64
   }
 
-  private fun roundingMode(): RoundingMode {
-    return RoundingMode.HALF_UP
-  }
-
   private fun throwIfCurrencyMismatch(otherCurrency: Currency) {
     if (currency != otherCurrency) {
-      V8NException.ifError(ErrorMessage.Builder().code("currency").message("currency mismatch").build())
+      throw V8NException(ErrorMessage.Builder().code("currency").message("currency mismatch").build())
     }
   }
 }

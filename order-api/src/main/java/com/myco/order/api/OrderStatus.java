@@ -1,5 +1,5 @@
 package com.myco.order.api;
 
 public enum OrderStatus {
-  OPEN, BACKORDERED, SHIPPED
+  OPEN, PLACED, PARTIALLY_SHIPPED, SHIPPED
 }

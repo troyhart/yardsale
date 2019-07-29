@@ -17,29 +17,34 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-@RestController @RequestMapping(path = "/users/{userId}") public class UserProfileAdminController
-    implements ControllerAdviceSupport {
+@RestController
+@RequestMapping(path = "/users/{userId}")
+public class UserProfileAdminController implements ControllerAdviceSupport {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileAdminController.class);
 
   private final CommandGateway commandGateway;
   private final QueryGateway queryGateway;
 
-  @Autowired public UserProfileAdminController(CommandGateway commandGateway, QueryGateway queryGateway) {
+  @Autowired
+  public UserProfileAdminController(CommandGateway commandGateway, QueryGateway queryGateway) {
     this.commandGateway = commandGateway;
     this.queryGateway = queryGateway;
   }
 
-  @Override public Logger logger() {
+  @Override
+  public Logger logger() {
     return LOGGER;
   }
 
-  @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE}) @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
+  @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+  @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
   public DeferredResult<? extends UserProfile> getUserProfile(@PathVariable String userId) {
     return UserProfileController.doGetUserProfile(queryGateway, userId);
   }
 
-  @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE}) @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
+  @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+  @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
   public DeferredResult<Void> createUserProfile(@PathVariable String userId, @RequestBody ExternalAuthInfoDto request) {
     CreateUser command = request.toCreateUserCommand(userId);
     V8NException.ifError(command.validate());
@@ -48,8 +53,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 
   @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
   @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
-  public DeferredResult<Void> updateExternalAuthInfo(@PathVariable String userId,
-      @RequestBody ExternalAuthInfoDto request) {
+  public DeferredResult<Void> updateExternalAuthInfo(
+      @PathVariable String userId, @RequestBody ExternalAuthInfoDto request
+  ) {
     UpdateExternalAuthInfo command = request.toUpdateExternalAuthInfoCommand(userId);
     V8NException.ifError(command.validate());
     return DeferredResultSupport.from(commandGateway.send(command));

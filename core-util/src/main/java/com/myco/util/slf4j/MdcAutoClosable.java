@@ -52,8 +52,7 @@ public final class MdcAutoClosable implements AutoCloseable {
   }
 
   /**
-   * @param context
-   *          initial context mapping, each entry is {@link #put(String, String)} onto this instance.
+   * @param context initial context mapping, each entry is {@link #put(String, String)} onto this instance.
    */
   public MdcAutoClosable(Map<String, String> context) {
     this();
@@ -71,10 +70,8 @@ public final class MdcAutoClosable implements AutoCloseable {
   /**
    * A new instance with a single initial entry.
    *
-   * @param key
-   *          initial entry key
-   * @param value
-   *          initial entry value
+   * @param key   initial entry key
+   * @param value initial entry value
    */
   public MdcAutoClosable(String key, Object value) {
     this();
@@ -143,9 +140,7 @@ public final class MdcAutoClosable implements AutoCloseable {
   }
 
   /**
-   * @param key
-   *          a context attribute key
-   *
+   * @param key a context attribute key
    * @return true if the key is defined in the local context.
    */
   public boolean isLocal(String key) {
@@ -156,7 +151,6 @@ public final class MdcAutoClosable implements AutoCloseable {
    * Same as calling {@link MDC#get(String)}.
    *
    * @param key
-   *
    * @return the value from {@link MDC#get(String)}
    */
   public String get(String key) {

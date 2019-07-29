@@ -17,12 +17,13 @@ public interface ServerSentEventProducerSupport {
    * events merged in.
    *
    * @param queryResult subscription query results
-   * @param seconds heartbeat period; the length of the interval duration with which "ping" events are emitted.
-   * @param <T> the query model type.
-   *
+   * @param seconds     heartbeat period; the length of the interval duration with which "ping" events are emitted.
+   * @param <T>         the query model type.
    * @return flux of server sent events
    */
-  default <T> Flux<ServerSentEvent<?>> toSSEFlux(HttpServletResponse response, SubscriptionQueryResult<T, T> queryResult, long seconds) {
+  default <T> Flux<ServerSentEvent<?>> toSSEFlux(
+      HttpServletResponse response, SubscriptionQueryResult<T, T> queryResult, long seconds
+  ) {
 
     return Flux.merge(toSSEFlux(response, queryResult), toSSEHeartbeatFlux(seconds))
         .doFinally(signalType -> logger().debug("SSE merged with heartbeat finalized; signalType: {}", signalType));
@@ -32,30 +33,28 @@ public interface ServerSentEventProducerSupport {
    * Turn {@link SubscriptionQueryResult}s into a flux of {@link ServerSentEvent}s of type T.
    *
    * @param queryResult subscription query results
-   * @param <T> the query model type.
-   *
+   * @param <T>         the query model type.
    * @return flux of server sent events
    */
-  default <T> Flux<ServerSentEvent<T>> toSSEFlux(HttpServletResponse response, SubscriptionQueryResult<T, T> queryResult) {
+  default <T> Flux<ServerSentEvent<T>> toSSEFlux(
+      HttpServletResponse response, SubscriptionQueryResult<T, T> queryResult
+  ) {
 
     // refer to: https://serverfault.com/questions/801628/for-server-sent-events-sse-what-nginx-proxy-configuration-is-appropriate
-    response.addHeader("Cache-Control","no-cache");
+    response.addHeader("Cache-Control", "no-cache");
     response.addHeader("X-Accel-Buffering", "no");
 
     return reactor.core.publisher.Flux.<T>create(emitter -> {
-      queryResult.initialResult()
-          .doOnError(error -> logger().warn("Initial result error", error))
+      queryResult.initialResult().doOnError(error -> logger().warn("Initial result error", error))
           .doFinally(signalType -> logger().debug("Initial result finalized; signalType: {}", signalType))
           .subscribe(emitter::next);
 
       queryResult.updates().buffer(Duration.ofMillis(500)).map(modelList -> modelList.get(modelList.size() - 1))
-          .doOnError(error -> logger().warn("Updates error", error)).doFinally(
-          signalType -> logger()
-              .debug("Updates finalized; signalType: {}", signalType)).doOnComplete(emitter::complete)
-          .subscribe(emitter::next);
+          .doOnError(error -> logger().warn("Updates error", error))
+          .doFinally(signalType -> logger().debug("Updates finalized; signalType: {}", signalType))
+          .doOnComplete(emitter::complete).subscribe(emitter::next);
 
-    }).doFinally(signalType -> logger()
-        .debug("SSE finalized; signalType: {}", signalType))
+    }).doFinally(signalType -> logger().debug("SSE finalized; signalType: {}", signalType))
         .map(data -> ServerSentEvent.<T>builder().data(data).event("message").build());
   }
 

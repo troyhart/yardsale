@@ -1,11 +1,10 @@
 package com.myco.api;
 
 import com.myco.api.values.Address;
-import com.myco.util.values.ErrorMessage;
+import com.myco.util.v8n.V8NException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class AddressTest {
@@ -28,12 +27,15 @@ public class AddressTest {
       fail("Expecting IllegalArgumentException.........");
     }
     catch (IllegalArgumentException e) {
-      // expected.....
+      // expected
     }
-    {
+
+    try {
       Address addr = new Address(" ", city, state, zip, country);
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
+    }
+    catch (V8NException e) {
+      // expected
     }
 
     // Verify city is validated
@@ -42,12 +44,15 @@ public class AddressTest {
       fail("Expecting IllegalArgumentException.........");
     }
     catch (IllegalArgumentException e) {
-      // expected.....
+      // expected
     }
-    {
+
+    try {
       Address addr = new Address(street, " ", state, zip, country);
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
+    }
+    catch (V8NException e) {
+      // expected
     }
 
     // Verify state is validated
@@ -56,12 +61,15 @@ public class AddressTest {
       fail("Expecting IllegalArgumentException.........");
     }
     catch (IllegalArgumentException e) {
-      // expected.....
+      // expected
     }
-    {
+
+    try {
       Address addr = new Address(street, city, " ", zip, country);
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
+    }
+    catch (V8NException e) {
+      // expected
     }
 
     // Verify zip is validated
@@ -70,24 +78,32 @@ public class AddressTest {
       fail("Expecting IllegalArgumentException.........");
     }
     catch (IllegalArgumentException e) {
-      // expected.....
+      // expected
     }
-    {
+
+    try {
       Address addr = new Address(street, city, state, " ", country);
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
+    }
+    catch (V8NException e) {
+      // expected
     }
 
     // Verify country is validated
-    {
+    try {
       Address addr = new Address(street, city, state, zip, null);
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
     }
-    {
+    catch (V8NException e) {
+      // expected
+    }
+
+    try {
       Address addr = new Address(street, city, state, zip, " ");
-      ErrorMessage emsg = addr.validate();
-      assertNotNull("expecting validation error", emsg);
+      fail("Expecting V8NException.........");
+    }
+    catch (V8NException e) {
+      // expected
     }
   }
 

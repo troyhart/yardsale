@@ -27,13 +27,20 @@ import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletResponse;
 
-@RestController @RequestMapping(path = "/user") public class UserProfileController
-    implements ControllerAdviceSupport, ServerSentEventProducerSupport {
+@RestController
+@RequestMapping(path = "/user")
+public class UserProfileController implements ControllerAdviceSupport, ServerSentEventProducerSupport {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileController.class);
 
   private final CommandGateway commandGateway;
   private final QueryGateway queryGateway;
+
+  @Autowired
+  public UserProfileController(CommandGateway commandGateway, QueryGateway queryGateway) {
+    this.commandGateway = commandGateway;
+    this.queryGateway = queryGateway;
+  }
 
   static DeferredResult<? extends UserProfile> doGetUserProfile(QueryGateway queryGateway, String userId) {
     UserProfileByIdQuery q = new UserProfileByIdQuery(userId);
@@ -41,20 +48,17 @@ import javax.servlet.http.HttpServletResponse;
         .whenComplete(DeferredResultSupport.completeQuery(q)));
   }
 
-  static SubscriptionQueryResult<UserProfile, UserProfile> subscriptionQueryResult(QueryGateway queryGateway,
-      String userProfileId) {
+  static SubscriptionQueryResult<UserProfile, UserProfile> subscriptionQueryResult(
+      QueryGateway queryGateway, String userProfileId
+  ) {
     SubscriptionQueryResult<UserProfile, UserProfile> queryResult = queryGateway
         .subscriptionQuery(new UserProfileByIdQuery(userProfileId), ResponseTypes.instanceOf(UserProfile.class),
             ResponseTypes.instanceOf(UserProfile.class));
     return queryResult;
   }
 
-  @Autowired public UserProfileController(CommandGateway commandGateway, QueryGateway queryGateway) {
-    this.commandGateway = commandGateway;
-    this.queryGateway = queryGateway;
-  }
-
-  @Override public Logger logger() {
+  @Override
+  public Logger logger() {
     return LOGGER;
   }
 
@@ -67,7 +71,8 @@ import javax.servlet.http.HttpServletResponse;
     return DeferredResultSupport.from(commandGateway.send(command));
   }
 
-  @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE}) @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+  @PreAuthorize("hasRole('ROLE_USER')")
   public DeferredResult<? extends UserProfile> getUserProfile() {
     UserInfo userInfo = AuthContext.authenticatedUserInfo();
     return doGetUserProfile(queryGateway, userInfo.getUserId());

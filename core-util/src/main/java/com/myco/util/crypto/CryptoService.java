@@ -22,7 +22,8 @@ import java.util.Base64;
  *
  * @author troyh
  */
-@Component public class CryptoService {
+@Component
+public class CryptoService {
 
   private final static String ALGORITHM_NAME = "AES/GCM/NoPadding";
   private final static int ALGORITHM_NONCE_SIZE = 12;
@@ -63,8 +64,9 @@ import java.util.Base64;
   }
 
 
-  public ObfuscatedToStringProperty<String> decryptString(ObfuscatedToStringProperty<String> secret,
-      String base64CiphertextAndNonceAndSalt) {
+  public ObfuscatedToStringProperty<String> decryptString(
+      ObfuscatedToStringProperty<String> secret, String base64CiphertextAndNonceAndSalt
+  ) {
     Assert.state(StringUtils.hasText(secret.getValue()), "null/blank secure data secret");
     Assert.hasText(base64CiphertextAndNonceAndSalt, "null/blank value to decrypt");
 

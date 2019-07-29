@@ -8,7 +8,7 @@ interface UserEvent {
 }
 
 data class UserCreated(
-  override val userId: String
+    override val userId: String
 ) : UserEvent
 
 

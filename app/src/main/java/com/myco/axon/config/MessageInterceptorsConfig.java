@@ -1,9 +1,9 @@
-package com.myco;
+package com.myco.axon.config;
 
 import com.myco.api.values.UserInfo;
 import com.myco.auth.AuthContext;
-import com.myco.util.values.ErrorMessage;
 import com.myco.util.slf4j.MdcAutoClosable;
+import com.myco.util.values.ErrorMessage;
 import org.axonframework.axonserver.connector.command.AxonServerCommandBus;
 import org.axonframework.axonserver.connector.query.AxonServerQueryBus;
 import org.axonframework.commandhandling.CommandBus;
@@ -21,11 +21,13 @@ import java.util.Collections;
 
 import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 
-@Configuration public class AxonMessageInterceptorsConfig {
+@Configuration
+public class MessageInterceptorsConfig {
 
-  private Logger LOGGER = LoggerFactory.getLogger(AxonMessageInterceptorsConfig.class);
+  private Logger LOGGER = LoggerFactory.getLogger(MessageInterceptorsConfig.class);
 
-  @Autowired public void registerInterceptors(CommandBus commandBus, QueryBus queryBus) {
+  @Autowired
+  public void registerInterceptors(CommandBus commandBus, QueryBus queryBus) {
     Assert.notNull(commandBus, "Invalid configuration, commandBus is null!");
     Assert.notNull(queryBus, "Invalid configuration, queryBus is null!");
 
@@ -75,6 +77,10 @@ import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
         }
         mdc.put("yardsaleUserId", userInfo.getUserId());
         LOGGER.debug("Authorization handler interceptor resolved user -> {}", userInfo);
+        
+        // TODO: check blacklist for message (???? unitOfWork.getMessage() ???) ...
+        // blacklisted -> deliver message to dead letter queue
+        // !blacklisted -> proceed()
         return interceptorChain.proceed();
       }
     };
