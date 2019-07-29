@@ -36,16 +36,6 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
     this.sequenceBlacklistRecordRepository = sequenceBlacklistRecordRepository;
   }
 
-  public static synchronized ListenerInvocationErrorHandler instance(
-      PlatformTransactionManager platformTransactionManager, FailureRecordRepository handlerFailureRecordRepository,
-      SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository
-  ) {
-    return INSTANCE == null ?
-        INSTANCE = new ErrorHandler(platformTransactionManager, handlerFailureRecordRepository,
-            sequenceBlacklistRecordRepository) :
-        INSTANCE;
-  }
-
   private SequenceBlacklistRecord handleBlacklisting(
       FailureRecord failureRecord, EventMessage<?> eventMessage, EventMessageHandler eventMessageHandler
   ) {

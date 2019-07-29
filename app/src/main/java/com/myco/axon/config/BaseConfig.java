@@ -63,11 +63,6 @@ public class BaseConfig {
   }
 
   @Bean
-  public EventGateway eventGateway(EventBus eventBus) {
-    return DefaultEventGateway.builder().eventBus(eventBus).build();
-  }
-
-  @Bean
   public CorrelationDataProvider messageOriginProvider() {
     return new MessageOriginProvider();
   }

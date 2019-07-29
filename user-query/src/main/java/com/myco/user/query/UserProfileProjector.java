@@ -58,6 +58,11 @@ class UserProfileProjector {
       ExternalAuthInfoUpdated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
+    if (event.getExternalUserId().endsWith("z")) {
+      // TODO: fix me....every time the external auth information is updated to value that ends with the character 'z' a failure will be triggered below...
+      // This is merely a predictable way to produce a failure!!!!!!!!!!!!!!!
+      throw new RuntimeException(("This is a test exception............"));
+    }
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
       UserProfileImpl userProfile = userProfileRepository.findById(event.getUserId()).get();
@@ -72,11 +77,6 @@ class UserProfileProjector {
       UserPreferencesUpdated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
-    if (event.getDimUnits() == UnitsDim.MM) {
-      // TODO: fix me....every time the dimUnits preference is updated to UnitsDim.MM a failure will be triggered below...
-      // This is merely a predictable way to produce a failure!!!!!!!!!!!!!!!
-      throw new RuntimeException(("This is a test exception............"));
-    }
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
       UserProfileImpl userProfile = userProfileRepository.findById(event.getUserId()).get();

@@ -17,6 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.Collections;
+import java.util.Map;
+
 @RestController
 @RequestMapping(path = "/users/{userId}")
 public class UserProfileAdminController implements ControllerAdviceSupport {
@@ -45,10 +48,13 @@ public class UserProfileAdminController implements ControllerAdviceSupport {
 
   @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
   @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
-  public DeferredResult<Void> createUserProfile(@PathVariable String userId, @RequestBody ExternalAuthInfoDto request) {
+  public DeferredResult<Map<String, String>> createUserProfile(
+      @PathVariable String userId, @RequestBody ExternalAuthInfoDto request
+  ) {
     CreateUser command = request.toCreateUserCommand(userId);
     V8NException.ifError(command.validate());
-    return DeferredResultSupport.from(commandGateway.send(command));
+    return DeferredResultSupport.from(commandGateway.send(command)
+        .thenApply(userProfileId -> Collections.singletonMap("userProfileId", userProfileId.toString())));
   }
 
   @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
