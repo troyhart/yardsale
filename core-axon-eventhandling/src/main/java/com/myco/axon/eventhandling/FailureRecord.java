@@ -27,24 +27,16 @@ public class FailureRecord {
   public FailureRecord() {
   }
 
-  public FailureRecord(String eventMessageIdentifier, Class<?> handlerType) {
-    this.id = toPrimaryKey(eventMessageIdentifier, handlerType);
+  public FailureRecord(String id) {
+    this.id = id;
     this.failureCount = 1;
     this.createdInstant = this.lastRetryInstant = Instant.now();
   }
 
   @NotNull
-  static String toPrimaryKey(String eventMessageIdentifier, Class<?> handlerType) {
-    String eventHandlerName = toEventHandlerName(handlerType);
-    return String.format("%s::%s", eventHandlerName, eventMessageIdentifier);
-  }
-
-  @NotNull
-  static String toEventHandlerName(Class<?> handlerType) {
-    String rawName = handlerType.getTypeName();
-    // TODO: consider alternatives to cropping at the first '$' character. It just seems like there should be a better way.
-    int idx = rawName.indexOf('$');
-    return (idx > 0) ? rawName.substring(0, idx) : rawName;
+  static String toPrimaryKey(Class<?> handlerType, Object eventMessageIdentifier) {
+    // TODO: fix me! Problems may lurk here because I'm just using the string representation of the eventMessageIdentifier...
+    return String.format("%s::%s", ErrorHandler.toEventProcessorGroupName(handlerType), eventMessageIdentifier);
   }
 
   @NotNull

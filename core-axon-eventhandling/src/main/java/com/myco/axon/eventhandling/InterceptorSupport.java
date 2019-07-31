@@ -1,47 +1,23 @@
-package com.myco.axon.config;
+package com.myco.axon.eventhandling;
 
 import com.myco.api.values.UserInfo;
 import com.myco.auth.AuthContext;
 import com.myco.util.slf4j.MdcAutoClosable;
 import com.myco.util.values.ErrorMessage;
-import org.axonframework.axonserver.connector.command.AxonServerCommandBus;
-import org.axonframework.axonserver.connector.query.AxonServerQueryBus;
-import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.messaging.Message;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.MessageHandlerInterceptor;
-import org.axonframework.queryhandling.QueryBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
 
 import java.util.Collections;
 
 import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 
-@Configuration
-public class MessageInterceptorsConfig {
+public class InterceptorSupport {
+  private static final Logger LOGGER = LoggerFactory.getLogger(InterceptorSupport.class);
 
-  private Logger LOGGER = LoggerFactory.getLogger(MessageInterceptorsConfig.class);
-
-  @Autowired
-  public void registerInterceptors(CommandBus commandBus, QueryBus queryBus) {
-    Assert.notNull(commandBus, "Invalid configuration, commandBus is null!");
-    Assert.notNull(queryBus, "Invalid configuration, queryBus is null!");
-
-    if (AxonServerCommandBus.class.isAssignableFrom(commandBus.getClass())) {
-      commandBus.registerDispatchInterceptor(authorizationDispatchInterceptor());
-      commandBus.registerHandlerInterceptor(authorizationHandlerInterceptor());
-    }
-    if (AxonServerQueryBus.class.isAssignableFrom(queryBus.getClass())) {
-      queryBus.registerDispatchInterceptor(authorizationDispatchInterceptor());
-      queryBus.registerHandlerInterceptor(authorizationHandlerInterceptor());
-    }
-  }
-
-  private MessageDispatchInterceptor<? super Message<?>> authorizationDispatchInterceptor() {
+  public static MessageDispatchInterceptor<? super Message<?>> authorizationDispatchInterceptor() {
     return list -> {
       if (AuthContext.authenticatedUserInfo() != null) {
         return (index, message) -> {
@@ -68,7 +44,7 @@ public class MessageInterceptorsConfig {
     };
   }
 
-  private MessageHandlerInterceptor<? super Message<?>> authorizationHandlerInterceptor() {
+  public static MessageHandlerInterceptor<? super Message<?>> authorizationHandlerInterceptor() {
     return (unitOfWork, interceptorChain) -> {
       try (MdcAutoClosable mdc = new MdcAutoClosable()) {
         UserInfo userInfo = (UserInfo) unitOfWork.getMessage().getMetaData().get(USER_INFO);
@@ -77,10 +53,6 @@ public class MessageInterceptorsConfig {
         }
         mdc.put("yardsaleUserId", userInfo.getUserId());
         LOGGER.debug("Authorization handler interceptor resolved user -> {}", userInfo);
-        
-        // TODO: check blacklist for message (???? unitOfWork.getMessage() ???) ...
-        // blacklisted -> deliver message to dead letter queue
-        // !blacklisted -> proceed()
         return interceptorChain.proceed();
       }
     };

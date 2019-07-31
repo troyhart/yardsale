@@ -1,7 +1,5 @@
 package com.myco.axon.eventhandling;
 
-import org.axonframework.eventhandling.EventMessage;
-import org.axonframework.eventhandling.async.SequentialPerAggregatePolicy;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
@@ -16,15 +14,14 @@ public class SequenceBlacklistRecord {
   public SequenceBlacklistRecord() {
   }
 
-  public SequenceBlacklistRecord(EventMessage<?> eventMessage, Class<?> handlerType) {
-    // TODO: determine if I can use the string value of the identifier along with the handler type for a unique blacklist identifier
-    this.id = toPrimaryKey(SequentialPerAggregatePolicy.instance().getSequenceIdentifierFor(eventMessage).toString(),
-        handlerType);
+  public SequenceBlacklistRecord(String id) {
+    this.id = id;
   }
 
   @NotNull
-  static String toPrimaryKey(String eventMessageIdentifier, Class<?> handlerType) {
-    return FailureRecord.toPrimaryKey(eventMessageIdentifier, handlerType);
+  static String toPrimaryKey(Class<?> handlerType, Object eventSequenceIdentifier) {
+    // TODO: fix me! Problems may lurk here because I'm just using the string representation of the eventMessageIdentifier...
+    return String.format("%s::%s", ErrorHandler.toEventProcessorGroupName(handlerType), eventSequenceIdentifier);
   }
 
   public String getId() {

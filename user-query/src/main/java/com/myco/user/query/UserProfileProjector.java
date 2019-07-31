@@ -1,7 +1,8 @@
 package com.myco.user.query;
 
-import com.myco.api.UnitsDim;
 import com.myco.api.values.UserInfo;
+import com.myco.axon.eventhandling.BlacklistAware;
+import com.myco.axon.eventhandling.SequenceBlacklistRecordRepository;
 import com.myco.user.api.events.ExternalAuthInfoUpdated;
 import com.myco.user.api.events.UserCreated;
 import com.myco.user.api.events.UserEvent;
@@ -26,18 +27,21 @@ import java.util.Optional;
 import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 
 @Component
-class UserProfileProjector {
+class UserProfileProjector implements BlacklistAware {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileProjector.class);
 
   private UserProfileRepository userProfileRepository;
   private QueryUpdateEmitter queryUpdateEmitter;
+  private SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository;
 
   @Autowired
   UserProfileProjector(
-      UserProfileRepository userProfileRepository, QueryUpdateEmitter queryUpdateEmitter
+      UserProfileRepository userProfileRepository, QueryUpdateEmitter queryUpdateEmitter,
+      SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository
   ) {
     this.userProfileRepository = userProfileRepository;
     this.queryUpdateEmitter = queryUpdateEmitter;
+    this.sequenceBlacklistRecordRepository = sequenceBlacklistRecordRepository;
   }
 
   @EventHandler
@@ -45,6 +49,9 @@ class UserProfileProjector {
       UserCreated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
+    // Opt-in to blacklisting...
+    throwIfBlacklisted(event.getUserId());
+
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
       UserProfileImpl userProfile = new UserProfileImpl();
@@ -58,6 +65,9 @@ class UserProfileProjector {
       ExternalAuthInfoUpdated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
+    // Opt-in to blacklisting...
+    throwIfBlacklisted(event.getUserId());
+
     if (event.getExternalUserId().endsWith("z")) {
       // TODO: fix me....every time the external auth information is updated to value that ends with the character 'z' a failure will be triggered below...
       // This is merely a predictable way to produce a failure!!!!!!!!!!!!!!!
@@ -77,6 +87,9 @@ class UserProfileProjector {
       UserPreferencesUpdated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
+    // Opt-in to blacklisting...
+    throwIfBlacklisted(event.getUserId());
+
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
       UserProfileImpl userProfile = userProfileRepository.findById(event.getUserId()).get();
@@ -123,5 +136,10 @@ class UserProfileProjector {
     mdc.put("authorizedUserSubjectId", userInfo.getUserId());
     mdc.put("authorizedUserName", userInfo.getUserName());
     LOGGER.debug("Materializing view from: {}", event);
+  }
+
+  @Override
+  public SequenceBlacklistRecordRepository getSequenceBlacklistRecordRepository() {
+    return sequenceBlacklistRecordRepository;
   }
 }

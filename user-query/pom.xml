@@ -22,16 +22,31 @@
       <artifactId>core-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>core-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>user-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>core-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>core-axon-eventhandling</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.myco</groupId>
-      <artifactId>core-util</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -71,16 +86,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.myco</groupId>
-      <artifactId>user-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.myco</groupId>
-      <artifactId>core-jpa</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>

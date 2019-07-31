@@ -27,6 +27,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.myco</groupId>
+      <artifactId>core-auth</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-spring-boot-starter</artifactId>
     </dependency>
