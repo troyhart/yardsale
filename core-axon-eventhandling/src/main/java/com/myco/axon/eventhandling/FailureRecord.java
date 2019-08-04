@@ -1,5 +1,7 @@
 package com.myco.axon.eventhandling;
 
+import org.axonframework.eventhandling.EventMessage;
+import org.axonframework.eventhandling.EventMessageHandler;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +29,22 @@ public class FailureRecord {
   public FailureRecord() {
   }
 
-  public FailureRecord(String id) {
+  FailureRecord(String id) {
     this.id = id;
     this.failureCount = 1;
     this.createdInstant = this.lastRetryInstant = Instant.now();
   }
 
   @NotNull
-  static String toPrimaryKey(Class<?> handlerType, Object eventMessageIdentifier) {
+  static String toEventProcessorGroupName(Class<?> handlerType) {
+    return handlerType.getPackage().getName();
+  }
+
+  @NotNull
+  static String toPrimaryKey(EventMessageHandler eventMessageHandler, EventMessage<?> eventMessage) {
     // TODO: fix me! Problems may lurk here because I'm just using the string representation of the eventMessageIdentifier...
-    return String.format("%s::%s", ErrorHandler.toEventProcessorGroupName(handlerType), eventMessageIdentifier);
+    return String
+        .format("%s::%s", toEventProcessorGroupName(eventMessageHandler.getTargetType()), eventMessage.getIdentifier());
   }
 
   @NotNull
