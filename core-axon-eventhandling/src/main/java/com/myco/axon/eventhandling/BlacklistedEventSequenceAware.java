@@ -1,7 +1,7 @@
 package com.myco.axon.eventhandling;
 
-public interface BlacklistAware {
-  SequenceBlacklistRecordRepository getSequenceBlacklistRecordRepository();
+public interface BlacklistedEventSequenceAware {
+  BlacklistedEventSequenceRepository getBlacklistedEventSequenceRepository();
 
   /**
    * An aggregate is black listed for a specific processing group. This default implementation takes the package of the
@@ -11,7 +11,7 @@ public interface BlacklistAware {
    * @throws EventQuarantinedException if the identified aggregate is black listed.
    */
   default void throwIfBlacklisted(String aggregateId) throws EventQuarantinedException {
-    if (getSequenceBlacklistRecordRepository().findById(SequenceBlacklistRecord.toPrimaryKey(getClass(), aggregateId))
+    if (getBlacklistedEventSequenceRepository().findById(BlacklistedEventSequence.toPrimaryKey(getClass(), aggregateId))
         .isPresent()) {
       throw new EventQuarantinedException();
     }

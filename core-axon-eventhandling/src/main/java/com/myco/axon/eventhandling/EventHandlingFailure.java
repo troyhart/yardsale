@@ -12,8 +12,8 @@ import javax.persistence.Id;
 import java.time.Instant;
 
 @Entity(name = "eventhandling_failures")
-public class FailureRecord {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FailureRecord.class);
+public class EventHandlingFailure {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventHandlingFailure.class);
 
   @Id
   private String id;
@@ -26,10 +26,10 @@ public class FailureRecord {
   @Column
   private Instant lastRetryInstant;
 
-  public FailureRecord() {
+  public EventHandlingFailure() {
   }
 
-  FailureRecord(String id) {
+  EventHandlingFailure(String id) {
     this.id = id;
     this.failureCount = 1;
     this.createdInstant = this.lastRetryInstant = Instant.now();
@@ -72,7 +72,7 @@ public class FailureRecord {
   }
 
   @NotNull
-  FailureRecord recordFailure() {
+  EventHandlingFailure recordFailure() {
     if (attemptsExhausted) {
       // This should never happen because the event shouldn't have even been retried when the state is already "attemptsExhausted"
       LOGGER.warn("Already exhausted record asked to handler another failure. No state will change in this case!");
@@ -89,7 +89,7 @@ public class FailureRecord {
     return this;
   }
 
-  protected FailureRecord bumpFailureCount() {
+  protected EventHandlingFailure bumpFailureCount() {
     if (!attemptsExhausted) {
       failureCount += 1;
       lastRetryInstant = Instant.now();
@@ -97,7 +97,7 @@ public class FailureRecord {
     return this;
   }
 
-  protected FailureRecord markAttemptsExhausted() {
+  protected EventHandlingFailure markAttemptsExhausted() {
     if (!attemptsExhausted) {
       lastRetryInstant = Instant.now();
       attemptsExhausted = true;
@@ -107,7 +107,7 @@ public class FailureRecord {
 
   @Override
   public String toString() {
-    return "FailureRecord{" + "id='" + id + '\'' + ", failureCount=" + failureCount + ", attemptsExhausted="
+    return "EventHandlingFailure{" + "id='" + id + '\'' + ", failureCount=" + failureCount + ", attemptsExhausted="
         + attemptsExhausted + ", createdInstant=" + createdInstant + ", lastRetryInstant=" + lastRetryInstant + '}';
   }
 }

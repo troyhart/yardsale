@@ -18,19 +18,19 @@ import java.util.Optional;
 public class ErrorHandler implements ListenerInvocationErrorHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(ErrorHandler.class);
 
-  private FailureRecordRepository failureRecordRepository;
-  private SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository;
+  private EventHandlingFailureRepository eventHandlingFailureRepository;
+  private BlacklistedEventSequenceRepository blacklistedEventSequenceRepository;
   private TransactionTemplate transactionTemplate;
 
   @Autowired
   private ErrorHandler(
-      PlatformTransactionManager platformTransactionManager, FailureRecordRepository failureRecordRepository,
-      SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository
+      PlatformTransactionManager platformTransactionManager, EventHandlingFailureRepository eventHandlingFailureRepository,
+      BlacklistedEventSequenceRepository blacklistedEventSequenceRepository
   ) {
     transactionTemplate = new TransactionTemplate(platformTransactionManager);
     transactionTemplate.setPropagationBehavior(Propagation.REQUIRES_NEW.value());
-    this.failureRecordRepository = failureRecordRepository;
-    this.sequenceBlacklistRecordRepository = sequenceBlacklistRecordRepository;
+    this.eventHandlingFailureRepository = eventHandlingFailureRepository;
+    this.blacklistedEventSequenceRepository = blacklistedEventSequenceRepository;
   }
 
   private void handleBlacklisting(
@@ -41,25 +41,25 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
       deliverDeadLetter(eventMessage, eventMessageHandler);
 
       // If there is an identifiable sequence then we can black list it, otherwise we can not
-      Optional<Object> aggregateIdentifier = SequenceBlacklistRecord.toSequenceIdentifier(eventMessage);
+      Optional<Object> aggregateIdentifier = BlacklistedEventSequence.toSequenceIdentifier(eventMessage);
       if (aggregateIdentifier.isPresent()) {
         // There is an identifiable sequence (aggregateIdentifier), so handle blacklisting it.
         deliverDeadLetter(eventMessage, eventMessageHandler);
         // blindly de-referencing the primary key below because I know it will be present, because
         // the aggregateIdentifier was present above.
-        String blacklistPK = SequenceBlacklistRecord.toPrimaryKey(eventMessageHandler, eventMessage).get();
-        Optional<SequenceBlacklistRecord> sequenceBlacklistRecord =
-            sequenceBlacklistRecordRepository.findById(blacklistPK);
+        String blacklistPK = BlacklistedEventSequence.toPrimaryKey(eventMessageHandler, eventMessage).get();
+        Optional<BlacklistedEventSequence> sequenceBlacklistRecord =
+            blacklistedEventSequenceRepository.findById(blacklistPK);
         if (sequenceBlacklistRecord.isPresent()) {
-          // Processors which are NOT BlacklistAware will continue to attempt to process events from a blacklisted sequence.
-          // subsequent failures for a given sequence (aggregate) will. BlacklistAware processors may also choose when to
+          // Processors which are NOT BlacklistedEventSequenceAware will continue to attempt to process events from a blacklisted sequence.
+          // subsequent failures for a given sequence (aggregate) will. BlacklistedEventSequenceAware processors may also choose when to
           // quarantine...
           LOGGER.debug("Sequence already blacklisted: {}", blacklistPK);
         }
         else {
           LOGGER.warn("Sequence blacklisted: {}", blacklistPK);
         }
-        sequenceBlacklistRecordRepository.save(new SequenceBlacklistRecord(blacklistPK));
+        blacklistedEventSequenceRepository.save(new BlacklistedEventSequence(blacklistPK));
       }
       else {
         // The given EventMessage is not a domain event because it doesn't have a sequence identifier
@@ -78,18 +78,18 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
   private void handlerFailure(
       Exception e, EventMessage<?> eventMessage, EventMessageHandler eventMessageHandler
   ) throws Exception {
-    FailureRecord failureRecord = transactionTemplate.execute(transactionStatus -> {
-      String failureRecordPK = FailureRecord.toPrimaryKey(eventMessageHandler, eventMessage);
-      Optional<FailureRecord> optionalHandlerFailureRecord = failureRecordRepository.findById(failureRecordPK);
+    EventHandlingFailure eventHandlingFailure = transactionTemplate.execute(transactionStatus -> {
+      String failureRecordPK = EventHandlingFailure.toPrimaryKey(eventMessageHandler, eventMessage);
+      Optional<EventHandlingFailure> optionalHandlerFailureRecord = eventHandlingFailureRepository.findById(failureRecordPK);
       return optionalHandlerFailureRecord.isPresent() ?
           // update existing record
-          failureRecordRepository.saveAndFlush(optionalHandlerFailureRecord.get().recordFailure()) :
+          eventHandlingFailureRepository.saveAndFlush(optionalHandlerFailureRecord.get().recordFailure()) :
           // a new failure record
-          failureRecordRepository.saveAndFlush(new FailureRecord(failureRecordPK));
+          eventHandlingFailureRepository.saveAndFlush(new EventHandlingFailure(failureRecordPK));
     });
 
-    LOGGER.info("Handling failure record: {}", failureRecord);
-    if (failureRecord.attemptsExhausted()) {
+    LOGGER.info("Handling failure record: {}", eventHandlingFailure);
+    if (eventHandlingFailure.attemptsExhausted()) {
       handleBlacklisting(eventMessage, eventMessageHandler);
     }
     else {
@@ -106,15 +106,15 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
     //
     // Thoughts: it seems like I shouldn't need an actual queue because I can identify every event message
     // and so it seems like I should simply be able to select events from the event store to replay as needed.
-    // I will just need to record the value of FailureRecord.toPrimaryKey(eventMessageHandler, eventMessage) in
+    // I will just need to record the value of EventHandlingFailure.toPrimaryKey(eventMessageHandler, eventMessage) in
     // order to identify both the processing group and the event message.
     // ************************************************************************
     // ************************************************************************
     // ************************************************************************
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
-      mdc.put("deadLetterId", FailureRecord.toPrimaryKey(eventMessageHandler, eventMessage));
-      Optional<String> sequenceRecordPK = SequenceBlacklistRecord.toPrimaryKey(eventMessageHandler, eventMessage);
+      mdc.put("deadLetterId", EventHandlingFailure.toPrimaryKey(eventMessageHandler, eventMessage));
+      Optional<String> sequenceRecordPK = BlacklistedEventSequence.toPrimaryKey(eventMessageHandler, eventMessage);
       if (sequenceRecordPK.isPresent()) {
         mdc.put("deadLetterSequenceId", sequenceRecordPK.get());
       }
@@ -133,7 +133,7 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
       mdc.put("eventMessageIdentifier", eventMessage.getIdentifier());
       mdc.put("eventMessagePayloadType", eventMessage.getPayloadType());
       mdc.put("eventMessageProcessorGroup",
-          FailureRecord.toEventProcessorGroupName(eventMessageHandler.getTargetType()));
+          EventHandlingFailure.toEventProcessorGroupName(eventMessageHandler.getTargetType()));
       LOGGER.error(String.format("Tracking processor error: %s", eventMessage), e);
 
       if (e instanceof EventQuarantinedException) {

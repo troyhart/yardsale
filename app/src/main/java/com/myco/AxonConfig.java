@@ -1,7 +1,7 @@
 package com.myco;
 
 import com.myco.axon.eventhandling.ErrorHandler;
-import com.myco.axon.eventhandling.FailureRecordRepository;
+import com.myco.axon.eventhandling.EventHandlingFailureRepository;
 import com.myco.axon.eventhandling.InterceptorSupport;
 import com.thoughtworks.xstream.XStream;
 import org.axonframework.axonserver.connector.command.AxonServerCommandBus;
@@ -42,7 +42,7 @@ public class AxonConfig {
   @Autowired
   public void configureEventProcessors(
       EventProcessingConfigurer configurer, PlatformTransactionManager platformTransactionManager,
-      FailureRecordRepository handlerFailureRecordRepository
+      EventHandlingFailureRepository handlerEventHandlingFailureRepository
   ) {
     // TODO: handle tracking event processor initialization. See the axon mailing list thread:
     // *****************************************************************************************************************

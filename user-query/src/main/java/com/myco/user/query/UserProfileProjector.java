@@ -1,8 +1,8 @@
 package com.myco.user.query;
 
 import com.myco.api.values.UserInfo;
-import com.myco.axon.eventhandling.BlacklistAware;
-import com.myco.axon.eventhandling.SequenceBlacklistRecordRepository;
+import com.myco.axon.eventhandling.BlacklistedEventSequenceAware;
+import com.myco.axon.eventhandling.BlacklistedEventSequenceRepository;
 import com.myco.user.api.events.ExternalAuthInfoUpdated;
 import com.myco.user.api.events.UserCreated;
 import com.myco.user.api.events.UserEvent;
@@ -27,21 +27,21 @@ import java.util.Optional;
 import static com.myco.api.AxonMessageMetadataKeys.USER_INFO;
 
 @Component
-class UserProfileProjector implements BlacklistAware {
+class UserProfileProjector implements BlacklistedEventSequenceAware {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileProjector.class);
 
   private UserProfileRepository userProfileRepository;
   private QueryUpdateEmitter queryUpdateEmitter;
-  private SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository;
+  private BlacklistedEventSequenceRepository blacklistedEventSequenceRepository;
 
   @Autowired
   UserProfileProjector(
       UserProfileRepository userProfileRepository, QueryUpdateEmitter queryUpdateEmitter,
-      SequenceBlacklistRecordRepository sequenceBlacklistRecordRepository
+      BlacklistedEventSequenceRepository blacklistedEventSequenceRepository
   ) {
     this.userProfileRepository = userProfileRepository;
     this.queryUpdateEmitter = queryUpdateEmitter;
-    this.sequenceBlacklistRecordRepository = sequenceBlacklistRecordRepository;
+    this.blacklistedEventSequenceRepository = blacklistedEventSequenceRepository;
   }
 
   @EventHandler
@@ -139,7 +139,7 @@ class UserProfileProjector implements BlacklistAware {
   }
 
   @Override
-  public SequenceBlacklistRecordRepository getSequenceBlacklistRecordRepository() {
-    return sequenceBlacklistRecordRepository;
+  public BlacklistedEventSequenceRepository getBlacklistedEventSequenceRepository() {
+    return blacklistedEventSequenceRepository;
   }
 }

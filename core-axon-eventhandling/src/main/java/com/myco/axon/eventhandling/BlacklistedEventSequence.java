@@ -10,15 +10,15 @@ import javax.persistence.Id;
 import java.util.Optional;
 
 @Entity(name = "eventhandling_sequence_blacklist")
-public class SequenceBlacklistRecord {
+public class BlacklistedEventSequence {
 
   @Id
   private String id;
 
-  public SequenceBlacklistRecord() {
+  public BlacklistedEventSequence() {
   }
 
-  SequenceBlacklistRecord(String id) {
+  BlacklistedEventSequence(String id) {
     this.id = id;
   }
 
@@ -47,7 +47,7 @@ public class SequenceBlacklistRecord {
     Optional<Object> sequenceIdentifier = toSequenceIdentifier(eventMessage);
     return sequenceIdentifier.isPresent() ?
         Optional.of(String
-            .format("%s::%s", FailureRecord.toEventProcessorGroupName(eventMessageHandler.getTargetType()),
+            .format("%s::%s", EventHandlingFailure.toEventProcessorGroupName(eventMessageHandler.getTargetType()),
                 sequenceIdentifier.get())) :
         Optional.empty();
   }
@@ -55,7 +55,7 @@ public class SequenceBlacklistRecord {
   @NotNull
   static String toPrimaryKey(Class<?> eventMessageHandlerTargetType, String aggregateIdentifier) {
     return String
-        .format("%s::%s", FailureRecord.toEventProcessorGroupName(eventMessageHandlerTargetType), aggregateIdentifier);
+        .format("%s::%s", EventHandlingFailure.toEventProcessorGroupName(eventMessageHandlerTargetType), aggregateIdentifier);
   }
 
   public String getId() {
@@ -64,6 +64,6 @@ public class SequenceBlacklistRecord {
 
   @Override
   public String toString() {
-    return "SequenceBlacklistRecord{" + "id='" + id + '\'' + '}';
+    return "BlacklistedEventSequence{" + "id='" + id + '\'' + '}';
   }
 }
