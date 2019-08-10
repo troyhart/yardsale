@@ -3,6 +3,8 @@ package com.myco.user.query;
 import com.myco.api.values.UserInfo;
 import com.myco.axon.eventhandling.BlacklistedEventSequenceAware;
 import com.myco.axon.eventhandling.BlacklistedEventSequenceRepository;
+import com.myco.axon.eventhandling.EventSequenceBlacklisted;
+import com.myco.user.api.UserProfile;
 import com.myco.user.api.events.ExternalAuthInfoUpdated;
 import com.myco.user.api.events.UserCreated;
 import com.myco.user.api.events.UserEvent;
@@ -45,6 +47,16 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
   }
 
   @EventHandler
+  void on(EventSequenceBlacklisted event) {
+    if (event.getProcessingGroup().equals(getClass().getPackage().getName())) {
+      Optional<UserProfileImpl> userProfile = userProfileRepository.findById(event.getEventSequenceId());
+      if (userProfile.isPresent()) {
+        userProfile.get().addStatus(UserProfile.Status.PROJECTION_FAILURE);
+      }
+    }
+  }
+
+  @EventHandler
   void on(
       UserCreated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue(USER_INFO) UserInfo userInfo
@@ -54,8 +66,7 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
-      UserProfileImpl userProfile = new UserProfileImpl();
-      userProfile.setUserId(event.getUserId());
+      UserProfileImpl userProfile = new UserProfileImpl(event.getUserId());
       save(userProfile, userInfo, occurrenceInstant, aggregateVersion);
     }
   }
@@ -69,10 +80,11 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
     throwIfBlacklisted(event.getUserId());
 
     if (event.getExternalUserId().endsWith("z")) {
-      // TODO: fix me....every time the external auth information is updated to value that ends with the character 'z' a failure will be triggered below...
-      // This is merely a predictable way to produce a failure!!!!!!!!!!!!!!!
+      // TODO: Fix Me!!! This is merely a predictable way to produce a failure
+      //  -> whenever the external user identifier ends with a 'z' we will fail!!!
       throw new RuntimeException(("This is a test exception............"));
     }
+
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
       UserProfileImpl userProfile = userProfileRepository.findById(event.getUserId()).get();

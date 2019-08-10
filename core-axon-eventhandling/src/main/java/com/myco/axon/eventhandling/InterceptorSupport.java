@@ -35,7 +35,7 @@ public class InterceptorSupport {
       return (index, message) -> {
         try (MdcAutoClosable mdc = new MdcAutoClosable()) {
           UserInfo userInfo = (UserInfo) message.getMetaData().get(USER_INFO);
-          mdc.put("yardsaleUserId", userInfo == null ? "ANONYMOUS" : userInfo.getUserId());
+          mdc.put("recoverUserId", userInfo == null ? "ANONYMOUS" : userInfo.getUserId());
           LOGGER
               .debug("Authorization dispatch interceptor resolved resolved user from message metadata -> {}", userInfo);
           return message;
@@ -51,7 +51,7 @@ public class InterceptorSupport {
         if (userInfo == null) {
           throw new SecurityException("Invalid user!");
         }
-        mdc.put("yardsaleUserId", userInfo.getUserId());
+        mdc.put("recoverUserId", userInfo.getUserId());
         LOGGER.debug("Authorization handler interceptor resolved user -> {}", userInfo);
         return interceptorChain.proceed();
       }

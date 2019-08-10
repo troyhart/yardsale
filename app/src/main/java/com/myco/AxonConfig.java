@@ -9,6 +9,8 @@ import org.axonframework.axonserver.connector.query.AxonServerQueryBus;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.config.EventProcessingConfigurer;
 import org.axonframework.eventhandling.EventBus;
+import org.axonframework.eventhandling.gateway.DefaultEventGateway;
+import org.axonframework.eventhandling.gateway.EventGateway;
 import org.axonframework.eventhandling.interceptors.EventLoggingInterceptor;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.messaging.correlation.MessageOriginProvider;
@@ -76,6 +78,11 @@ public class AxonConfig {
 
     // Event Logging on dispatch!
     eventBus.registerDispatchInterceptor(new EventLoggingInterceptor("com.myco.axon"));
+  }
+
+  @Bean
+  public EventGateway eventGateway(EventBus eventBus) {
+    return DefaultEventGateway.builder().eventBus(eventBus).build();
   }
 
   @Bean

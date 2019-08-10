@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.Instant;
 
-@Entity(name = "eventhandling_failures")
+@Entity
 public class EventHandlingFailure {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventHandlingFailure.class);
 
@@ -29,22 +29,14 @@ public class EventHandlingFailure {
   public EventHandlingFailure() {
   }
 
-  EventHandlingFailure(String id) {
+  EventHandlingFailure(String id, boolean retryable) {
     this.id = id;
     this.failureCount = 1;
     this.createdInstant = this.lastRetryInstant = Instant.now();
-  }
-
-  @NotNull
-  static String toEventProcessorGroupName(Class<?> handlerType) {
-    return handlerType.getPackage().getName();
-  }
-
-  @NotNull
-  static String toPrimaryKey(EventMessageHandler eventMessageHandler, EventMessage<?> eventMessage) {
-    // TODO: fix me! Problems may lurk here because I'm just using the string representation of the eventMessageIdentifier...
-    return String
-        .format("%s::%s", toEventProcessorGroupName(eventMessageHandler.getTargetType()), eventMessage.getIdentifier());
+    if (!retryable) {
+      lastRetryInstant = Instant.now();
+      attemptsExhausted = true;
+    }
   }
 
   @NotNull
@@ -72,14 +64,14 @@ public class EventHandlingFailure {
   }
 
   @NotNull
-  EventHandlingFailure recordFailure() {
+  EventHandlingFailure recordFailure(boolean retryable) {
     if (attemptsExhausted) {
       // This should never happen because the event shouldn't have even been retried when the state is already "attemptsExhausted"
       LOGGER.warn("Already exhausted record asked to handler another failure. No state will change in this case!");
     }
     else {
-      //TODO: determine the right value for retry count...7 wasn't really researched or anything...
-      if (getFailureCount() > 7) {
+      //TODO: determine the upper limit. 10 is arbitrary!
+      if (getFailureCount() >= 10 || !retryable) {
         markAttemptsExhausted();
       }
       else {

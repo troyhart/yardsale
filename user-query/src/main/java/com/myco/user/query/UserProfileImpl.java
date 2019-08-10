@@ -5,10 +5,12 @@ import com.myco.api.UnitsWeight;
 import com.myco.user.api.UserProfile;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "yardsale_user_profiles")
 public class UserProfileImpl implements UserProfile {
@@ -35,13 +37,20 @@ public class UserProfileImpl implements UserProfile {
   @Column
   private long aggregateVersion;
 
-  public String getUserId() {
-    return userId;
+  @Convert(converter = StatusSetConverter.class)
+  @Column(columnDefinition = "text")
+  private StatusSet status;
+
+  public UserProfileImpl() {
   }
 
-  UserProfileImpl setUserId(String userId) {
+  public UserProfileImpl(String userId) {
     this.userId = userId;
-    return this;
+    status = new StatusSet();
+  }
+
+  public String getUserId() {
+    return userId;
   }
 
   @Override
@@ -81,6 +90,21 @@ public class UserProfileImpl implements UserProfile {
 
   UserProfileImpl setWeightUnits(UnitsWeight weightUnits) {
     this.weightUnits = weightUnits;
+    return this;
+  }
+
+  @Override
+  public Set<Status> getStatus() {
+    return status.getSet();
+  }
+
+  UserProfileImpl addStatus(Status status) {
+    this.status.getSet().add(status);
+    return this;
+  }
+
+  UserProfileImpl removeStatus(Status status) {
+    this.status.getSet().remove(status);
     return this;
   }
 
