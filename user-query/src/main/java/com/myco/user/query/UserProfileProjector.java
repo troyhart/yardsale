@@ -82,7 +82,7 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
     if (event.getExternalUserId().endsWith("z")) {
       // TODO: Fix Me!!! This is merely a predictable way to produce a failure
       //  -> whenever the external user identifier ends with a 'z' we will fail!!!
-      throw new RuntimeException(("This is a test exception............"));
+      throw new IllegalArgumentException(("This is a test exception............"));
     }
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
