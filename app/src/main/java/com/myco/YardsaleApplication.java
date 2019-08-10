@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myco.api.values.UserInfo;
 import com.myco.auth.AuthContext;
-import com.myco.axon.eventhandling.EventHandlingFailureRepository;
+import com.myco.axon.eventhandling.errors.EventHandlingFailureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,6 +1,7 @@
-package com.myco.axon.eventhandling;
+package com.myco.axon.eventhandling.errors;
 
 import com.myco.util.slf4j.MdcAutoClosable;
+import com.myco.util.v8n.V8NException;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventMessageHandler;
 import org.axonframework.eventhandling.ListenerInvocationErrorHandler;
@@ -105,7 +106,7 @@ public class ErrorHandler implements ListenerInvocationErrorHandler {
   }
 
   private boolean isRetryable(Exception e) {
-    return !(e instanceof IllegalArgumentException || e instanceof NullPointerException);
+    return !(e instanceof IllegalArgumentException || e instanceof NullPointerException || e instanceof V8NException);
   }
 
   private void deliverDeadLetter(EventMessage<?> eventMessage, EventMessageHandler eventMessageHandler) {

@@ -1,4 +1,4 @@
-package com.myco.axon.eventhandling;
+package com.myco.axon.eventhandling.errors;
 
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventMessageHandler;

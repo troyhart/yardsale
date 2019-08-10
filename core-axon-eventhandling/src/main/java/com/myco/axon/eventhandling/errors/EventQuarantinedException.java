@@ -1,4 +1,4 @@
-package com.myco.axon.eventhandling;
+package com.myco.axon.eventhandling.errors;
 
 public class EventQuarantinedException extends RuntimeException {
   /**

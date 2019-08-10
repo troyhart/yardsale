@@ -1,9 +1,9 @@
 package com.myco.user.query;
 
 import com.myco.api.values.UserInfo;
-import com.myco.axon.eventhandling.BlacklistedEventSequenceAware;
-import com.myco.axon.eventhandling.BlacklistedEventSequenceRepository;
-import com.myco.axon.eventhandling.EventSequenceBlacklisted;
+import com.myco.axon.eventhandling.errors.BlacklistedEventSequenceAware;
+import com.myco.axon.eventhandling.errors.BlacklistedEventSequenceRepository;
+import com.myco.axon.eventhandling.errors.EventSequenceBlacklisted;
 import com.myco.user.api.UserProfile;
 import com.myco.user.api.events.ExternalAuthInfoUpdated;
 import com.myco.user.api.events.UserCreated;
@@ -15,6 +15,7 @@ import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.SequenceNumber;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.messaging.annotation.MetaDataValue;
+import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.queryhandling.QueryHandler;
 import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.slf4j.Logger;
@@ -34,21 +35,31 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
 
   private UserProfileRepository userProfileRepository;
   private QueryUpdateEmitter queryUpdateEmitter;
-  private BlacklistedEventSequenceRepository blacklistedEventSequenceRepository;
+  private QueryGateway queryGateway;
 
   @Autowired
   UserProfileProjector(
       UserProfileRepository userProfileRepository, QueryUpdateEmitter queryUpdateEmitter,
-      BlacklistedEventSequenceRepository blacklistedEventSequenceRepository
+      QueryGateway queryGateway
   ) {
     this.userProfileRepository = userProfileRepository;
     this.queryUpdateEmitter = queryUpdateEmitter;
-    this.blacklistedEventSequenceRepository = blacklistedEventSequenceRepository;
+    this.queryGateway = queryGateway;
+  }
+
+  @Override
+  public Logger logger() {
+    return LOGGER;
+  }
+
+  @Override
+  public QueryGateway queryGateway() {
+    return queryGateway;
   }
 
   @EventHandler
   void on(EventSequenceBlacklisted event) {
-    if (event.getProcessingGroup().equals(getClass().getPackage().getName())) {
+    if (event.forEventMessageHandlerTargetType(getClass())) {
       Optional<UserProfileImpl> userProfile = userProfileRepository.findById(event.getEventSequenceId());
       if (userProfile.isPresent()) {
         userProfile.get().addStatus(UserProfile.Status.PROJECTION_FAILURE);
@@ -62,7 +73,7 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
     // Opt-in to blacklisting...
-    throwIfBlacklisted(event.getUserId());
+    throwIfBlacklistedEventSequence(event.getUserId());
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
@@ -77,7 +88,7 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
     // Opt-in to blacklisting...
-    throwIfBlacklisted(event.getUserId());
+    throwIfBlacklistedEventSequence(event.getUserId());
 
     if (event.getExternalUserId().endsWith("z")) {
       // TODO: Fix Me!!! This is merely a predictable way to produce a failure
@@ -100,7 +111,7 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
       @MetaDataValue(USER_INFO) UserInfo userInfo
   ) {
     // Opt-in to blacklisting...
-    throwIfBlacklisted(event.getUserId());
+    throwIfBlacklistedEventSequence(event.getUserId());
 
     try (MdcAutoClosable mdc = new MdcAutoClosable()) {
       mdc(event, userInfo, aggregateVersion, mdc);
@@ -148,10 +159,5 @@ class UserProfileProjector implements BlacklistedEventSequenceAware {
     mdc.put("authorizedUserSubjectId", userInfo.getUserId());
     mdc.put("authorizedUserName", userInfo.getUserName());
     LOGGER.debug("Materializing view from: {}", event);
-  }
-
-  @Override
-  public BlacklistedEventSequenceRepository getBlacklistedEventSequenceRepository() {
-    return blacklistedEventSequenceRepository;
   }
 }

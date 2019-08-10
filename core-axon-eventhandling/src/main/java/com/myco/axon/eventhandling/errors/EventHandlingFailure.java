@@ -1,7 +1,5 @@
-package com.myco.axon.eventhandling;
+package com.myco.axon.eventhandling.errors;
 
-import org.axonframework.eventhandling.EventMessage;
-import org.axonframework.eventhandling.EventMessageHandler;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

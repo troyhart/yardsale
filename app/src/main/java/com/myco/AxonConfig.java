@@ -1,7 +1,7 @@
 package com.myco;
 
-import com.myco.axon.eventhandling.ErrorHandler;
-import com.myco.axon.eventhandling.EventHandlingFailureRepository;
+import com.myco.axon.eventhandling.errors.ErrorHandler;
+import com.myco.axon.eventhandling.errors.EventHandlingFailureRepository;
 import com.myco.axon.eventhandling.InterceptorSupport;
 import com.thoughtworks.xstream.XStream;
 import org.axonframework.axonserver.connector.command.AxonServerCommandBus;
