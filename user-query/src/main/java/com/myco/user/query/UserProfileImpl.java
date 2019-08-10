@@ -145,24 +145,24 @@ public class UserProfileImpl implements UserProfile {
   }
 
   @Override
-  public boolean equals(Object object) {
-    if (this == object) return true;
-    if (!(object instanceof UserProfileImpl)) return false;
-    if (!super.equals(object)) return false;
-    UserProfileImpl that = (UserProfileImpl) object;
-    return Objects.equals(userId, that.userId);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof UserProfileImpl)) return false;
+    UserProfileImpl that = (UserProfileImpl) o;
+    return userId.equals(that.userId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), userId);
+    return Objects.hash(userId);
   }
 
   @Override
   public String toString() {
-    return "UserProfileImpl{" + "userId='" + userId + '\'' + ", externalUserId=" + externalUserId
-        + ", externalApiKeyEncrypted='" + externalApiKeyEncrypted + '\'' + ", lastModifiedBy='" + lastModifiedBy + '\''
-        + ", lastModifiedById='" + lastModifiedById + '\'' + ", setLastModifiedInstant=" + lastModifiedInstant
-        + ", setAggregateVersion=" + aggregateVersion + '}';
+    return "UserProfileImpl{" + "userId='" + userId + '\'' + ", externalUserId='" + externalUserId + '\''
+        + ", externalApiKeyEncrypted='" + externalApiKeyEncrypted + '\'' + ", dimUnits=" + dimUnits + ", weightUnits="
+        + weightUnits + ", lastModifiedBy='" + lastModifiedBy + '\'' + ", lastModifiedById='" + lastModifiedById + '\''
+        + ", lastModifiedInstant=" + lastModifiedInstant + ", aggregateVersion=" + aggregateVersion + ", status="
+        + status + '}';
   }
 }
