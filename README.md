@@ -57,3 +57,4 @@ curl --request GET \
   --url http://localhost:8081/users/<keycloak.subject.id> \
   --header 'authorization: Bearer <your.access.token>'
 ```
+This is a test
