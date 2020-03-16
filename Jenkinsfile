@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('build and unit test') {
       steps {
-        sh 'sh ./mvnw install'
+        sh './mvnw install'
       }
     }
   }
